@@ -3,5 +3,15 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/oKDE"/>
+	<classpathentry kind="lib" path="lib/JavaAPIforKml.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/jonas/workspace_android/PrePos/lib/JavaAPIforKML_apidocs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jaxb-api.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-core.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-impl.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-jxc.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-xjc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
