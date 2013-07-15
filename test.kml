@@ -43,12 +43,112 @@
 <styleUrl>#multiTrack</styleUrl>
 <gx:Track>
 <altitudeMode>clampToGround</altitudeMode>
+
+
+<when>2013-04-02T07:12:00.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:05.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:10.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:15.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:20.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:25.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:30.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:35.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
 <when>2013-04-02T07:12:40.403-07:00</when>
-<gx:coord>9.994469 53.551874 0</gx:coord>
-<when>2013-04-02T07:12:42.403-07:00</when>
-<gx:coord>10.042877 53.588572 0</gx:coord>
-<when>2013-04-02T07:12:52.403-07:00</when>
-<gx:coord>10.045795 53.588516 0</gx:coord>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:00.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:05.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:10.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:15.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:20.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:25.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:30.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:35.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:40.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:00.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:05.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:10.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:15.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:20.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:25.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:30.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:35.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:40.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+<when>2013-04-02T07:12:00.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:05.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:10.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:15.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:20.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:25.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:30.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:35.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:40.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+<when>2013-04-02T07:12:00.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:05.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:10.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:15.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:20.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:25.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+<when>2013-04-02T07:12:30.403-07:00</when>
+<gx:coord>1 1 0</gx:coord>
+<when>2013-04-02T07:12:35.403-07:00</when>
+<gx:coord>1 3 0</gx:coord>
+<when>2013-04-02T07:12:40.403-07:00</when>
+<gx:coord>3 3 0</gx:coord>
+
+
 
 </gx:Track>
 </Placemark>

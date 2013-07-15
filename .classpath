@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="lib/jaxb-jxc.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb-xjc.jar"/>
 	<classpathentry kind="lib" path="lib/ejml-0.22.jar" sourcepath="/home/jonas/ejml"/>
+	<classpathentry kind="lib" path="lib/jmathplot.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

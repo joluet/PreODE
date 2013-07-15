@@ -1,5 +1,6 @@
 package de.tuhh.luethke.PrePos.Transformation;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -14,7 +15,7 @@ public class PositionalTSTransformer {
      * If time difference is smaller the data points are considered to be conditionally dependent.
      * */
     private static final long MAX_TIME_DIFF_SEC = 420; //7 minutes
-    private static final long MIN_TIME_DIFF_SEC = 180; //3 minutes
+    private static final long MIN_TIME_DIFF_SEC = 0; //3 minutes
 
     
     /**
@@ -28,11 +29,15 @@ public class PositionalTSTransformer {
     public static LinkedList<SimpleMatrix> transformTSData(LinkedList<Measurement> data, int order) {
 	LinkedList<SimpleMatrix> transformedData = new LinkedList<SimpleMatrix>();
 	Measurement tmp = null;
-	Measurement[] batch = new Measurement[order];
+	Measurement[] batch;
 	int batchIndex;
 	for(int i=0; i<data.size(); i++){
+	    // clear batch
+	    batch = new Measurement[order];
 	    batchIndex = 0;
-	    for(int j=i; j<data.size() && batchIndex<order; j++){
+	    // add actual element to batch
+	    batch[batchIndex++] = data.get(i);
+	    for(int j=i+1; j<data.size() && batchIndex<order; j++){
 		// calculate time difference
 		double timeDiff = data.get(i).timeDiffInSeconds(data.get(j));
 		// if time difference in bounds: add measurement to batch
@@ -42,7 +47,9 @@ public class PositionalTSTransformer {
 		    // when time difference gets to big --> break!
 		    break;
 	    }
-	    transformedData.add(measurementsToSimpleMatrix(batch));
+	    // check if there are empty elements in batch
+	    if(!Arrays.asList(batch).contains(null))
+		transformedData.add(measurementsToSimpleMatrix(batch));
 	}
 	return transformedData;
     }
@@ -52,8 +59,8 @@ public class PositionalTSTransformer {
 	double lat, lng;
 	int row = 0;
 	for(Measurement m : measurements){
-	    lat = m.getLat10E6();
-	    lng = m.getLng10E6();
+	    lat = m.getLat();
+	    lng = m.getLng();
 	    matrix.set(row++, 0, lat);
 	    matrix.set(row++, 0, lng);	    
 	}

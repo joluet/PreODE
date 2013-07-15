@@ -22,6 +22,20 @@ public class Measurement {
 	this.mLng = m.getLng();
 	this.mDate = m.getDate();
     }
+    
+    public double distanceInUnits(Measurement m) {
+	double distance = 0;
+	if (m != null) {
+	    double lat1 = this.getLat();
+	    double lat2 = m.getLat();
+	    double lon1 = this.getLng();
+	    double lon2 = m.getLng();
+	    double dLat = lat2 - lat1;
+	    double dLon = lon2 - lon1;
+	    distance = Math.sqrt(Math.pow(dLat,2)+Math.pow(dLon,2));
+	}
+	return distance;
+    }
 
     public double distanceInMeters(Measurement m) {
 	double distance = 0;
