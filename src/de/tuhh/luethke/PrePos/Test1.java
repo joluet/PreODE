@@ -9,7 +9,6 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -17,77 +16,74 @@ import javax.swing.JFrame;
 import org.ejml.simple.SimpleMatrix;
 import org.math.plot.Plot3DPanel;
 
-import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
-import de.tuhh.luethke.PrePos.Transformation.Postprocessor;
-import de.tuhh.luethke.PrePos.utility.CabDataPaser;
-import de.tuhh.luethke.PrePos.utility.LatitudeHistoryParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
+import de.tuhh.luethke.oKDE.StdRandom;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
 import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
 import de.tuhh.luethke.oKDE.model.SampleModel;
 
-public class Test {
+public class Test1 {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		LinkedList<Measurement> measurements = CabDataPaser.parse("new_uvjeahot_tst.txt");//LatitudeHistoryParser.parse("jonas.kml");
-		Postprocessor.processData(measurements);
-		Postprocessor.projectData(measurements);
-		//System.out.println(measurements.size());
-		//for (Measurement m : measurements)
-		//	System.out.println(m.getLat() + " " + m.getLng());
-		measurementsToHeatMapFile(measurements);
-
-		
-		List<SimpleMatrix> posVectors = PositionalTSTransformer.transformTSData(
-		  measurements, 2);
-		System.out.println(posVectors.size()+" Datenpunkte");
-		// System.out.println("matrices");
-		// for(SimpleMatrix m : matrices)
-		// System.out.println(m);
+		/*
+		 * LinkedList<Measurement> measurements =
+		 * CabDataPaser.parse("custom_TestData.txt"
+		 * );//LatitudeHistoryParser.parse("jonas.kml");
+		 * Postprocessor.processData(measurements);
+		 * //Postprocessor.projectData(measurements);
+		 * //System.out.println(measurements.size()); //for (Measurement m :
+		 * measurements) // System.out.println(m.getLat() + " " + m.getLng());
+		 * measurementsToHeatMapFile(measurements);
+		 * 
+		 * 
+		 * List<SimpleMatrix> posVectors =
+		 * PositionalTSTransformer.transformTSData( measurements, 2);
+		 * System.out.println(posVectors.size()+" Datenpunkte"); //
+		 * System.out.println("matrices"); // for(SimpleMatrix m : matrices) //
+		 * System.out.println(m);
+		 */
 		SampleModel dist = new SampleModel();
 
-		ArrayList<SimpleMatrix> means = new ArrayList<SimpleMatrix>();
-		double[] weights = new double[500];
-		ArrayList<SimpleMatrix> cov1 = new ArrayList<SimpleMatrix>();
 		double[] w = { 1, 1, 1 };
 		double[][] c = { { 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0 } };
-		//double[][] c = { { 0.0, 0.0}, { 0.0, 0.0 } };
+		// double[][] c = { { 0.0, 0.0}, { 0.0, 0.0 } };
 		SimpleMatrix[] cov = { new SimpleMatrix(c), new SimpleMatrix(c), new SimpleMatrix(c) };
 		ArrayList<SimpleMatrix> meansA = new ArrayList<SimpleMatrix>();
-//		double[][] mean1 = { { 0 }, { 3 }, { 0 }, { 2 } };
-//		double[][] mean2 = { { 0 }, { 1 }, { 4 }, { 0 } };
-//		double[][] mean3 = { { 0 }, { 2 }, { 0 }, { 3 } };
-		double[][] mean1 = { { 37.810462}, {-122.36472  },{37.783604},{-122.395104}};
-		double[][] mean2 = { { 37.783604}, {-122.395104  },{37.764744},{ -122.404888}};
-		double[][] mean3 = { { 37.764744}, {-122.404888  },{37.764744},{ -122.419479}};
-		meansA.add(Postprocessor.projectData4(new SimpleMatrix(mean1)));
-		meansA.add(Postprocessor.projectData4(new SimpleMatrix(mean2)));
-		meansA.add(Postprocessor.projectData4(new SimpleMatrix(mean3)));
+		double[][] mean1 = { { 0 }, { 0 }, { 1 }, { 1 } };
+		double[][] mean2 = { { 1 }, { 1 }, { 0 }, { 0 } };
+		double[][] mean3 = { { 0 }, { 0 }, { 1 }, { 1 } };
+		// double[][] mean1 = { { 37.810462}, {-122.36472 }};
+		// double[][] mean2 = { { 37.783604}, {122.395104 }};
+		// double[][] mean3 = { { 37.764744}, {-122.404888 }};
+		meansA.add(new SimpleMatrix(mean1));
+		meansA.add(new SimpleMatrix(mean2));
+		meansA.add(new SimpleMatrix(mean3));
 		try {
 			dist.updateDistribution(meansA.toArray(new SimpleMatrix[3]), cov, w);
 
 			double d1 = 0, d2 = 0, d3 = 0, d4 = 0;
-			for (int i = 0; i < posVectors.size(); i++) {
-				/*if (i % 3 == 0) {
-					d1 = StdRandom.gaussian(1, 0.2);
-					d2 = StdRandom.gaussian(1, 0.2);
+			for (int i = 0; i < 100; i++) {
+				if (i % 3 == 0) {
+					d1 = StdRandom.gaussian(100, 0.2);
+					d2 = StdRandom.gaussian(200, 0.2);
 					d3 = StdRandom.gaussian(1, 0.2);
 					d4 = StdRandom.gaussian(3, 0.2);
 				} else if (i % 2 == 0) {
 					d1 = StdRandom.gaussian(1, 0.2);
 					d2 = StdRandom.gaussian(3, 0.2);
-					d3 = StdRandom.gaussian(3, 0.2);
-					d4 = StdRandom.gaussian(3, 0.2);
+					d3 = StdRandom.gaussian(300, 0.2);
+					d4 = StdRandom.gaussian(300, 0.2);
 				} else if (i % 1 == 0) {
 					d1 = StdRandom.gaussian(3, 0.2);
 					d2 = StdRandom.gaussian(3, 0.2);
 					d3 = StdRandom.gaussian(1, 0.2);
-					d4 = StdRandom.gaussian(1, 0.2);
-				}*/
-				SimpleMatrix pos = posVectors.get(i);
+					d4 = StdRandom.gaussian(2, 0.2);
+				}
+				double[][] dataVector = { { d1 }, { d2 }, { d3 }, { d4 } };
+				SimpleMatrix pos = new SimpleMatrix(dataVector);
 				dist.updateDistribution(pos, new SimpleMatrix(c), 1d);
 				meansA.add(pos);
 
@@ -114,49 +110,46 @@ public class Test {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		ArrayList<SimpleMatrix> weightedCoordinates = new ArrayList<SimpleMatrix>();
-		for(int i=0; i<dist.getSubDistributions().size(); i++){
-			System.out.println(dist.getSubMeans().get(i)+" w: " +dist.getSubWeights().get(i));
-			/*for(int j=0; j<dist.getSubWeights().get(i)*1000; j++){
-				weightedCoordinates.add(new SimpleMatrix(dist.getSubMeans().get(i)));
-			}*/
+		// ArrayList<SimpleMatrix> weightedCoordinates = new
+		// ArrayList<SimpleMatrix>();
+
+		for (int i = 0; i < dist.getSubDistributions().size(); i++) {
+			System.out.println(dist.getSubMeans().get(i) + " w: " + dist.getSubWeights().get(i));
+
 		}
-		
-		dataToFile(meansA);
-		System.out.println(meansA.size()+" effektive Datenpunkte");
+
+		// dataToFile(meansA);
+		System.out.println(meansA.size() + " effektive Datenpunkte");
 
 		// define your data
-		double[] x = new double[400];
-		double[] y = new double[400];
-		
-		/*double coord = 52.8;
-		 * for (int i = 0; i < 100; i++) {
-			coord += 0.03;
-			x[i] = coord;
-		}
+		double[] x = new double[100];
+		double[] y = new double[100];
 
-		 coord = 9.1;
+		/*
+		 * double coord = 52.8; for (int i = 0; i < 100; i++) { coord += 0.03;
+		 * x[i] = coord; }
+		 * 
+		 * coord = 9.1; for (int i = 0; i < 100; i++) { coord += 0.01; y[i] =
+		 * coord; }
+		 */
+		double coord = 0;
 		for (int i = 0; i < 100; i++) {
-			coord += 0.01;
-			y[i] = coord;
-		}*/
-		double coord = 37;
-		for (int i = 0; i < 400; i++) {
-			coord += 0.0025;
+			coord += 10;
 			x[i] = coord;
 		}
 
-		 coord = -122;
-		for (int i = 0; i < 400; i++) {
-			coord -= 0.0025;
+		coord = 0;
+		for (int i = 0; i < 100; i++) {
+			coord += 10;
 			y[i] = coord;
 		}
 		double[][] z1;
-		z1 = calculateY1(x, y, 37.783604 ,-122.395104  , dist, weightedCoordinates, false);
-		dataToHeatMapFile(weightedCoordinates);
+
+		z1 = calculateY(x, y, 1, 2, dist, false);
+		// dataToHeatMapFile(weightedCoordinates);
 		// create your PlotPanel (you can use it as a JPanel) with a legend at
 		// SOUTH
-		/*Plot3DPanel plot = new Plot3DPanel("SOUTH");
+		Plot3DPanel plot = new Plot3DPanel("SOUTH");
 
 		// add grid plot to the PlotPanel
 		plot.addGridPlot("kernel", x, y, z1);
@@ -165,40 +158,38 @@ public class Test {
 		JFrame frame = new JFrame("a plot panel");
 		frame.setSize(600, 600);
 		frame.setContentPane(plot);
-		frame.setVisible(true);*/
+		frame.setVisible(true);
 
 	}
 
-
-
-	
 	/*
 	 * public static double calculateY(double x, double y, SampleDist dist,
 	 * ArrayList<SimpleMatrix> means) { double z = cos(x * PI) * sin(y * PI);
 	 * return z; }
 	 */
 
-	public static double[][] calculateY1(double[] x, double[] y, double setX, double setY, BaseSampleDistribution dist, ArrayList<SimpleMatrix> weightedCoordinates, boolean swap) {
-		double[][] z = new double[x.length][y.length];
+	public static double[][] calculateY(double[] x, double[] y, double setX, double setY, BaseSampleDistribution dist, boolean swap) {
+		double[][] z = new double[y.length][x.length];
 		for (int i = 0; i < x.length; i++)
 			for (int j = 0; j < y.length; j++) {
 				// System.out.println("x, y: "+x[i]+" - "y[j]);
 				double[][] dxVector = new double[4][1];
+				if (!swap) {
 					dxVector[0][0] = setX;
 					dxVector[1][0] = setY;
-					dxVector[2][0] = x[i];
-					dxVector[3][0] = y[j];
-
+					dxVector[3][0] = x[i];
+					dxVector[2][0] = y[j];
+				} else {
+					dxVector[3][0] = setX;
+					dxVector[2][0] = setY;
+					dxVector[0][0] = x[i];
+					dxVector[1][0] = y[j];
+				}
 				// double[][] dxVector = { { x[i] }, { y[j] } };
 				SimpleMatrix pointVector = new SimpleMatrix(dxVector);
-				SimpleMatrix pointVector1 = Postprocessor.projectData4(pointVector);
-				z[i][j] = dist.evaluate(pointVector1);
-				for(int k=1; k<((int)z[i][j]); k++){
-					SimpleMatrix m = new SimpleMatrix(2,1);
-					m.set(0,0,pointVector.get(2,0));
-					m.set(1,0,pointVector.get(3,0));
-					weightedCoordinates.add(new SimpleMatrix(m));
-				}
+				// pointVector = Postprocessor.projectData(pointVector);
+				z[i][j] = dist.evaluate(pointVector);
+
 			}
 		return z;
 	}
@@ -226,7 +217,7 @@ public class Test {
 				pw.close();
 		}
 	}
-	
+
 	private static void dataToHeatMapFile(List<SimpleMatrix> data) {
 		PrintWriter pw = null;
 		try {
@@ -234,7 +225,7 @@ public class Test {
 			Writer bw = new BufferedWriter(fw);
 			pw = new PrintWriter(bw);
 			for (SimpleMatrix m : data)
-				pw.println(m.get(0, 0) + " "+m.get(1, 0) );
+				pw.println(m.get(0, 0) + " " + m.get(1, 0));
 		}
 
 		catch (IOException e) {
@@ -244,7 +235,7 @@ public class Test {
 				pw.close();
 		}
 	}
-	
+
 	private static void measurementsToHeatMapFile(List<Measurement> data) {
 		PrintWriter pw = null;
 		try {
@@ -252,7 +243,7 @@ public class Test {
 			Writer bw = new BufferedWriter(fw);
 			pw = new PrintWriter(bw);
 			for (Measurement m : data)
-				pw.println(m.getLat() + " "+m.getLng() );
+				pw.println(m.getLat() + " " + m.getLng());
 		}
 
 		catch (IOException e) {
