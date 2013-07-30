@@ -20,7 +20,6 @@ import org.math.plot.Plot3DPanel;
 import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
 import de.tuhh.luethke.PrePos.Transformation.Postprocessor;
 import de.tuhh.luethke.PrePos.utility.CabDataPaser;
-import de.tuhh.luethke.PrePos.utility.LatitudeHistoryParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
 import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
@@ -32,9 +31,9 @@ public class TestOneDim {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		LinkedList<Measurement> measurements = CabDataPaser.parse("new_uvjeahot_tst.txt");// LatitudeHistoryParser.parse("jonas.kml");
+		LinkedList<Measurement> measurements = CabDataPaser.parse("new_eghanwib.txt");// LatitudeHistoryParser.parse("jonas.kml");
 		Postprocessor.processData(measurements);
-		// Postprocessor.projectData(measurements);
+		//Postprocessor.projectData(measurements);
 		// System.out.println(measurements.size());
 		// for (Measurement m : measurements)
 		// System.out.println(m.getLat() + " " + m.getLng());
@@ -45,6 +44,7 @@ public class TestOneDim {
 		// System.out.println("matrices");
 		// for(SimpleMatrix m : matrices)
 		// System.out.println(m);
+		Postprocessor.projectData(posVectors);
 		SampleModel dist = new SampleModel();
 
 		ArrayList<SimpleMatrix> means = new ArrayList<SimpleMatrix>();
@@ -59,11 +59,11 @@ public class TestOneDim {
 		// double[][] mean2 = { { 0 }, { 1 }, { 4 }, { 0 } };
 		// double[][] mean3 = { { 0 }, { 2 }, { 0 }, { 3 } };
 		double[][] mean1 = { { 37.810462 }, { -122.36472 } };
-		double[][] mean2 = { { 37.783604 }, { -122.395104 }};
-		double[][] mean3 = { { 37.764744 }, { -122.404888 }};
-		meansA.add(new SimpleMatrix(mean1));
-		meansA.add(new SimpleMatrix(mean2));
-		meansA.add(new SimpleMatrix(mean3));
+		double[][] mean2 = { { 37.783604 }, { -122.395104 } };
+		double[][] mean3 = { { 37.764744 }, { -122.404888 } };
+		meansA.add(Postprocessor.projectData(new SimpleMatrix(mean1)));
+		meansA.add(Postprocessor.projectData(new SimpleMatrix(mean2)));
+		meansA.add(Postprocessor.projectData(new SimpleMatrix(mean3)));
 		try {
 			dist.updateDistribution(meansA.toArray(new SimpleMatrix[3]), cov, w);
 
@@ -148,16 +148,16 @@ public class TestOneDim {
 		dataToHeatMapFile(weightedCoordinates);
 		// create your PlotPanel (you can use it as a JPanel) with a legend at
 		// SOUTH
-		/*
-		 * Plot3DPanel plot = new Plot3DPanel("SOUTH");
-		 * 
-		 * // add grid plot to the PlotPanel plot.addGridPlot("kernel", x, y,
-		 * z1);
-		 * 
-		 * // put the PlotPanel in a JFrame like a JPanel JFrame frame = new
-		 * JFrame("a plot panel"); frame.setSize(600, 600);
-		 * frame.setContentPane(plot); frame.setVisible(true);
-		 */
+
+		Plot3DPanel plot = new Plot3DPanel("SOUTH");
+
+		plot.addGridPlot("kernel", x, y, z1);
+
+		// put the PlotPanel in a JFrame like a JPanel 
+		JFrame frame = new JFrame("a plot panel");
+		frame.setSize(600, 600);
+		frame.setContentPane(plot);
+		frame.setVisible(true);
 
 	}
 
@@ -198,14 +198,14 @@ public class TestOneDim {
 			for (int j = 0; j < y.length; j++) {
 				// System.out.println("x, y: "+x[i]+" - "y[j]);
 				double[][] dxVector = new double[2][1];
-					dxVector[0][0] = x[i];
-					dxVector[1][0] = y[j];
+				dxVector[0][0] = x[i];
+				dxVector[1][0] = y[j];
 
 				// double[][] dxVector = { { x[i] }, { y[j] } };
 				SimpleMatrix pointVector = new SimpleMatrix(dxVector);
 				// pointVector = Postprocessor.projectData(pointVector);
-				z[i][j] = dist.evaluate(pointVector);
-				for (int k = 1; k < ((int) z[i][j]-10); k++) {
+				z[i][j] = dist.evaluate(Postprocessor.projectData(pointVector));
+				for (int k = 1; k < ((int) z[i][j] ); k++) {
 					SimpleMatrix m = new SimpleMatrix(2, 1);
 					m.set(0, 0, pointVector.get(0, 0));
 					m.set(1, 0, pointVector.get(1, 0));

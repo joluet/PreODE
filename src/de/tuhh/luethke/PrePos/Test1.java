@@ -16,6 +16,7 @@ import javax.swing.JFrame;
 import org.ejml.simple.SimpleMatrix;
 import org.math.plot.Plot3DPanel;
 
+import de.tuhh.luethke.PrePos.Transformation.Postprocessor;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.oKDE.StdRandom;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
@@ -65,22 +66,22 @@ public class Test1 {
 			dist.updateDistribution(meansA.toArray(new SimpleMatrix[3]), cov, w);
 
 			double d1 = 0, d2 = 0, d3 = 0, d4 = 0;
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 10; i++) {
 				if (i % 3 == 0) {
-					d1 = StdRandom.gaussian(100, 0.2);
-					d2 = StdRandom.gaussian(200, 0.2);
-					d3 = StdRandom.gaussian(1, 0.2);
-					d4 = StdRandom.gaussian(3, 0.2);
+					d1 = 1;//StdRandom.gaussian(1, 0.1);
+					d2 = 2;//StdRandom.gaussian(2, 0.1);
+					d3 = 1;//StdRandom.gaussian(1, 0.1);
+					d4 = 3;//StdRandom.gaussian(3, 0.1);
 				} else if (i % 2 == 0) {
-					d1 = StdRandom.gaussian(1, 0.2);
-					d2 = StdRandom.gaussian(3, 0.2);
-					d3 = StdRandom.gaussian(300, 0.2);
-					d4 = StdRandom.gaussian(300, 0.2);
+					d1 = 1;//StdRandom.gaussian(1, 0.1);
+					d2 = 3;//StdRandom.gaussian(3, 0.1);
+					d3 = 3;//StdRandom.gaussian(3, 0.1);
+					d4 = 3;//StdRandom.gaussian(3, 0.1);
 				} else if (i % 1 == 0) {
-					d1 = StdRandom.gaussian(3, 0.2);
-					d2 = StdRandom.gaussian(3, 0.2);
-					d3 = StdRandom.gaussian(1, 0.2);
-					d4 = StdRandom.gaussian(2, 0.2);
+					d1 = 3;//StdRandom.gaussian(3, 0.1);
+					d2 = 1;//StdRandom.gaussian(3, 0.1);
+					d3 = 1;//StdRandom.gaussian(1, 0.1);
+					d4 = 2;//StdRandom.gaussian(2, 0.1);
 				}
 				double[][] dataVector = { { d1 }, { d2 }, { d3 }, { d4 } };
 				SimpleMatrix pos = new SimpleMatrix(dataVector);
@@ -120,6 +121,8 @@ public class Test1 {
 
 		// dataToFile(meansA);
 		System.out.println(meansA.size() + " effektive Datenpunkte");
+		
+		System.out.println("BW: "+dist.getBandwidthMatrix());
 
 		// define your data
 		double[] x = new double[100];
@@ -134,17 +137,26 @@ public class Test1 {
 		 */
 		double coord = 0;
 		for (int i = 0; i < 100; i++) {
-			coord += 10;
+			coord += .1;
 			x[i] = coord;
 		}
 
 		coord = 0;
 		for (int i = 0; i < 100; i++) {
-			coord += 10;
+			coord += .1;
 			y[i] = coord;
 		}
 		double[][] z1;
-
+		double[][] dxVector = new double[2][1];
+		dxVector[0][0] = 1;
+		dxVector[1][0] = 2;
+		// double[][] dxVector = { { x[i] }, { y[j] } };
+		SimpleMatrix pointVector = new SimpleMatrix(dxVector);
+		dxVector[0][0] = 1;
+		dxVector[1][0] = 3;
+		SimpleMatrix testVector = new SimpleMatrix(dxVector);
+		double prob = dist.trapezoidRule1(pointVector,testVector, 50,50);
+		System.out.println("prob "+prob);
 		z1 = calculateY(x, y, 1, 2, dist, false);
 		// dataToHeatMapFile(weightedCoordinates);
 		// create your PlotPanel (you can use it as a JPanel) with a legend at

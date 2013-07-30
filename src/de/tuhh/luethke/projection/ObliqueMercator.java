@@ -97,7 +97,7 @@ public class ObliqueMercator implements MapProjection
         FN = 500000;*/
         
         
-     // Custom Ch-03 parameters for PrePos
+     // Custom parameters for PrePos
         this.ellipsoid = new Ellipsoid(Ellipsoid.BESSEL_1841);
         //San Francisco as center:
         lc = 37.61569*DEG2RAD;
