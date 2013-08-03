@@ -15,7 +15,11 @@ public class CabDataPaser {
 			Measurement m = new Measurement(Double.valueOf(line[0]), Double.valueOf(line[1]), Integer.valueOf(line[3]));
 			measurements.add(m);
 		}
-		return measurements;
+		LinkedList<Measurement> measurementsReverseOrder = new LinkedList<Measurement>();
+		for(int i=measurements.size()-1; i>0; i--) {
+			measurementsReverseOrder.add(measurements.get(i));
+		}
+		return measurementsReverseOrder;
 	}
 
 	private static ArrayList<String[]> readFromFileToLineArray(String fileName) {
