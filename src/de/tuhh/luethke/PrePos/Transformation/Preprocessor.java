@@ -53,12 +53,14 @@ public class Preprocessor {
 	
 	public static SimpleMatrix projectDataBack(SimpleMatrix m) {
 		SimpleMatrix m1 = new SimpleMatrix(m);
-		UTMRef utm = new UTMRef(10,'S',(float) m1.get(0, 0), (float) m1.get(1, 0));
-		LatLng ll = utm.toLatLng();
-		double lat = ll.getLatitude();
-		double lng = ll.getLongitude();
-		m1.set(0, 0, lat);
-		m1.set(1, 0, lng);
+		for(int i=0; i<m.numRows()-1; i+=2) {
+			UTMRef utm = new UTMRef(10,'S',(float) m1.get(i, 0), (float) m1.get(i+1, 0));
+			LatLng ll = utm.toLatLng();
+			double lat = ll.getLatitude();
+			double lng = ll.getLongitude();
+			m1.set(i, 0, lat);
+			m1.set(i+1, 0, lng);
+		}
 		return m1;
 	}
 
@@ -102,15 +104,15 @@ public class Preprocessor {
 	}
 	
 	public static SimpleMatrix projectData(SimpleMatrix m) {
-		SimpleMatrix m1 = new SimpleMatrix(m);
-		for(int i=0; i<m1.numRows()-1; i+=2) {
-			LatLng ll = new LatLng((float) m1.get(i, 0), (float) m1.get(i+1, 0));
+		//SimpleMatrix m1 = new SimpleMatrix(m);
+		for(int i=0; i<m.numRows()-1; i+=2) {
+			LatLng ll = new LatLng((float) m.get(i, 0), (float) m.get(i+1, 0));
 			double easting = ll.toUTMRef().getEasting();
 			double northing = ll.toUTMRef().getNorthing();
-			m1.set(i, 0, easting);
-			m1.set(i+1, 0, northing);
+			m.set(i, 0, easting);
+			m.set(i+1, 0, northing);
 		}
-		return m1;
+		return m;
 	}
 	
 

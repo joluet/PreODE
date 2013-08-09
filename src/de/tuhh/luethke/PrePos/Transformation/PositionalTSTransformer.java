@@ -59,7 +59,7 @@ public class PositionalTSTransformer {
 		return transformedData;
 	}
 	
-	public static LinkedList<SimpleMatrix> transformTSData1(List<Measurement> data, int order, int stepSize, int tolerance) {
+	public static LinkedList<SimpleMatrix> transformTSData1(List<Measurement> data, int order, int stepSize, int tolerance, int dataPointsNeeded) {
 		LinkedList<SimpleMatrix> transformedData = new LinkedList<SimpleMatrix>();
 		Measurement[] batch;
 		int batchIndex;
@@ -89,15 +89,17 @@ public class PositionalTSTransformer {
 					break;
 			}
 			// check if there are empty elements in batch
-			if (!Arrays.asList(batch).contains(null))
+			if (!Arrays.asList(batch).contains(null)) {
 				transformedData.add(measurementsToSimpleMatrix(batch));
+				if(transformedData.size() >= dataPointsNeeded)
+					return transformedData;
+			}
 		}
 		return transformedData;
 	}
 	
-	public static LinkedList<Measurement[]> transformTSDataMeasurements(List<Measurement> data, int order, int stepSize, int tolerance) {
+	public static LinkedList<Measurement[]> transformTSDataMeasurements(List<Measurement> data, int order, int stepSize, int tolerance, int dataPointsNeeded) {
 		LinkedList<Measurement[]> transformedData = new LinkedList<Measurement[]>();
-		Measurement tmp = null;
 		Measurement[] batch;
 		int batchIndex;
 		for (int i = 0; i < data.size(); i++) {
@@ -126,8 +128,11 @@ public class PositionalTSTransformer {
 					break;
 			}
 			// check if there are empty elements in batch
-			if (!Arrays.asList(batch).contains(null))
+			if (!Arrays.asList(batch).contains(null)) {
 				transformedData.add(batch);
+				if(transformedData.size() >= dataPointsNeeded)
+					return transformedData;
+			}
 		}
 		return transformedData;
 	}

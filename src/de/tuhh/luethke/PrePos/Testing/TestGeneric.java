@@ -29,11 +29,13 @@ import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
 import de.tuhh.luethke.oKDE.model.SampleModel;
 
 public class TestGeneric {
+	
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		
 		String dataFileName = args[0];
 		int noOfLearningSamples = Integer.valueOf(args[1]);
 		int noOfTestingSamples = Integer.valueOf(args[2]);
@@ -43,38 +45,65 @@ public class TestGeneric {
 		double forgettingFactor = Double.valueOf(args[6]);
 		double compressionThreshold = Double.valueOf(args[7]);
 		String kdeFileName = args[8];
+		
+		//Grid parameters for evaluation of KDE
+		int coarseGridWidth = Integer.valueOf(args[9]);
+		int coarseSegmentWidth = Integer.valueOf(args[10]);
+		int coarseEvalSegments = Integer.valueOf(args[11]);
+		int fineSegmentWidth = Integer.valueOf(args[12]);
+		int fineEvalSegments = Integer.valueOf(args[13]);
+		int outputProbSquareWidth = Integer.valueOf(args[14]);
+		int outputProbSquareSegments = Integer.valueOf(args[15]);
+		
+		//parameters for execution
+		int noOfWorkerThreads = Integer.valueOf(args[16]);
+		long maxUpdateTime = Long.valueOf(args[17])*60;
+		long maxPredictionTime = Long.valueOf(args[18])*60;
 
 
 		String paramterInfoString = "Input data file: "+dataFileName+"\n";
 		paramterInfoString += "Number of samples used for learning: "+noOfLearningSamples+"\n";
 		paramterInfoString += "Number of samples used for testing: "+noOfTestingSamples+"\n";
 		paramterInfoString += "Prediction dimension: "+predictionSteps+"\n";
-		paramterInfoString += "Prediction step size: "+stepSize+"\n";
-		paramterInfoString += "Prediction step tolerance: "+tolerance+"\n";
+		paramterInfoString += "Prediction step size: "+stepSize+"s\n";
+		paramterInfoString += "Prediction step tolerance: "+tolerance+"s\n";
 		paramterInfoString += "oKDE forgetting factor: "+forgettingFactor+"\n";
 		paramterInfoString += "oKDE compression threshold: "+compressionThreshold+"\n";
+		
+		paramterInfoString += "Width of coarse square evaluation grid: "+coarseGridWidth+"\n";
+		paramterInfoString += "Width of coarse square evaluation segment: "+coarseSegmentWidth+"\n";
+		paramterInfoString += "Number of subsegments for coarse evaluation: "+coarseEvalSegments+"\n";
+		paramterInfoString += "Width of fine square evaluation grid: "+fineSegmentWidth+"\n";
+		paramterInfoString += "Number of subsegments for fine evaluation: "+fineEvalSegments+"\n";
+		paramterInfoString += "Width of square surface element to evaluate at maximum: "+outputProbSquareWidth+"\n";
+		paramterInfoString += "Number of subsegments for evaluation at maximum: "+outputProbSquareSegments+"\n";
+		
 		paramterInfoString += "KDE output file name: "+kdeFileName+"\n";
+		paramterInfoString += "Number of worker threads: "+noOfWorkerThreads+"\n";
+		paramterInfoString += "Maximum time for learning: "+maxUpdateTime+"s\n";
+		paramterInfoString += "Maximum time for predicting: "+maxPredictionTime+"s\n";
 
+		int overallSamples = noOfLearningSamples + noOfTestingSamples;
+		
 		// print info
 		System.out.println(paramterInfoString);
 		
 		LinkedList<Measurement> testData = CabDataPaser.parse(dataFileName);
-		//Preprocessor.processTestData(testData);
+		Preprocessor.processTestData(testData);
 		//System.out.println(testData.size());
-		List<Measurement[]> testDataVectors = PositionalTSTransformer.transformTSDataMeasurements(testData, predictionSteps, stepSize, tolerance);
+		List<Measurement[]> testDataVectors = PositionalTSTransformer.transformTSDataMeasurements(testData, predictionSteps, stepSize, tolerance, overallSamples);
 
-		testDataToFile(testData);
 
 		//Preprocessor.processData(measurements);
 		// System.out.println(measurements.size());
 		// for (Measurement m : measurements)
 		// System.out.println(m.getLat() + " " + m.getLng());
-		measurementsToHeatMapFile(testDataVectors);
+		//measurementsToHeatMapFile(testDataVectors);
 		System.out.println("$-----------------------------------------------------------------");
 
-		List<SimpleMatrix> posVectors = PositionalTSTransformer.transformTSData1(testData, predictionSteps, stepSize, tolerance);
+		List<SimpleMatrix> posVectors = PositionalTSTransformer.transformTSData1(testData, predictionSteps, stepSize, tolerance, overallSamples);
 		System.out.println("Extracted "+testDataVectors.size()+" possible test- and learning-vectors.");
-		System.out.println("Start learning...");
+		System.out.println("Start learning...\n");
 
 
 		if(posVectors.size() < (noOfLearningSamples + noOfTestingSamples)){
@@ -86,38 +115,50 @@ public class TestGeneric {
 		
 		Preprocessor.projectData(posVectors);
 
-		// System.out.println("matrices");
-		// for(SimpleMatrix m : matrices)
-		// System.out.println(m);
 		SampleModel dist = new SampleModel(forgettingFactor, compressionThreshold);
 
 		double[] w = { 1, 1, 1 };
-		double[][] c = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-				{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-				{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }};
-		// double[][] c = { { 0.0, 0.0}, { 0.0, 0.0 } };
+		
+		double[][] c = new double[posVectors.get(0).numRows()][posVectors.get(0).numRows()];
+		for(int i=0; i<c.length; i++){
+			for(int j=0; j<c.length; j++){
+				c[i][j] = 0;
+			}
+		}
 		SimpleMatrix[] cov = { new SimpleMatrix(c), new SimpleMatrix(c), new SimpleMatrix(c) };
 		ArrayList<SimpleMatrix> meansA = new ArrayList<SimpleMatrix>();
-		// double[][] mean1 = { { 0 }, { 3 }, { 0 }, { 2 } };
-		// double[][] mean2 = { { 0 }, { 1 }, { 4 }, { 0 } };
-		// double[][] mean3 = { { 0 }, { 2 }, { 0 }, { 3 } };
-		//double[][] mean1 = { { 37.810462 }, { -122.36472 }, { 37.783604 }, { -122.395104 }, { 37.783604 }, { -122.395104 } };
-		//double[][] mean2 = { { 37.783604 }, { -122.395104 }, { 37.764744 }, { -122.404888 }, { 37.764744 }, { -122.404888 } };
-		//double[][] mean3 = { { 37.764744 }, { -122.404888 }, { 37.764744 }, { -122.419479 }, { 37.764744 }, { -122.419479 } };
 		int start = posVectors.size()-noOfLearningSamples-noOfTestingSamples;
 		int stop = posVectors.size()-noOfTestingSamples;
 		meansA.add(posVectors.get(start));
 		meansA.add(posVectors.get(start+1));
 		meansA.add(posVectors.get(start+2));
+		long startTime = System.currentTimeMillis();
 		try {
 			dist.updateDistribution(meansA.toArray(new SimpleMatrix[3]), cov, w);
 
-			double d1 = 0, d2 = 0, d3 = 0, d4 = 0;
 			long time = 0;
 			
 			for (int i = start+3; i < stop; i++) {
+				if((System.currentTimeMillis()-startTime)/1000 > maxUpdateTime) {
+					System.out.println("Learning took too much time.");
+					System.exit(1);
+				}
+					
 				if (i % 100 == 0){
-					System.out.println(i+" "+(System.currentTimeMillis()-time)+"ms");
+					time = System.currentTimeMillis()-time;
+					System.out.println(i+" "+(time)+"ms");
+					System.out.println("Components: "+dist.getSubMeans().size());
+					System.out.println("Added by EM: "+dist.mEMCount);
+					//System.out.println("Average EM-error: "+dist.mEMError+" ("+dist.mEMCount+")");
+					//increase compression threshold if distribution updates take too long
+					/*if(time > 5000 && time < 13000) {
+						dist.mCompressionThreshold = dist.mCompressionThreshold*1.1;
+						System.out.println("Increased compression threshold to: "+dist.mCompressionThreshold);
+					}*/
+					/*if(time >= 9000) {
+						dist.mCompressionThreshold = dist.mCompressionThreshold*1.3;
+						System.out.println("Increased compression threshold to: "+dist.mCompressionThreshold);
+					}*/
 					time = System.currentTimeMillis();
 				}
 				/*
@@ -158,6 +199,7 @@ public class TestGeneric {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("Time needed for leraning: "+(System.currentTimeMillis()-startTime)/1000);
 		writeKDEToFile(dist, kdeFileName);
 		
 		/*System.out.println("*******************************************");
@@ -209,23 +251,31 @@ public class TestGeneric {
 		System.out.println("$-----------------------------------------------------------------");
 		System.out.println("Start prediction...");
 		ArrayList<Future<Double>> futureResults = new ArrayList<Future<Double>>();
-		ExecutorService executor = Executors.newFixedThreadPool(2);
+		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkerThreads);
 		for (int i = testDataVectors.size()-noOfTestingSamples; i < testDataVectors.size(); i++) {
-			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist);
+			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, coarseGridWidth, coarseSegmentWidth, coarseEvalSegments,
+					fineSegmentWidth, fineEvalSegments, outputProbSquareWidth, outputProbSquareSegments);
 			futureResults.add(executor.submit(worker));
 		}
-
+		startTime = System.currentTimeMillis();
 		double avg = 0;
 		for (int i = 0; i < futureResults.size(); i++) {
+			if((System.currentTimeMillis()-startTime)/1000 > maxPredictionTime) {
+				System.out.println("Prediction took too much time.");
+				System.exit(1);
+			}
 			try {
-				if (i > 0)
-					avg = ((float)i / (float)(i+1)) * avg + (1f / (float)(i+1)) * futureResults.get(i).get();
-				else
-					avg = futureResults.get(i).get();
+				if(futureResults.get(i).get() != null) {
+					if (i > 0)
+						avg = ((float)i / (float)(i+1)) * avg + (1f / (float)(i+1)) * futureResults.get(i).get();
+					else
+						avg = futureResults.get(i).get();
+				}
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("Time needed for prediction: "+(System.currentTimeMillis()-startTime)/1000);
 		executor.shutdownNow();
 /*
 		for (int i = 12; i < 999; i += 3) {

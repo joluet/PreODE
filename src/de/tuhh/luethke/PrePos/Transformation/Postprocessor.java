@@ -16,6 +16,8 @@ public class Postprocessor {
 					tmpList.add(pdfSamples[row][col]);
 			}
 		}
+		if(tmpList.size() == 0)
+			return null;
 		Double[] tmp = tmpList.toArray(new Double[1]);
 		Arrays.sort(tmp);
 		double median = tmp[tmp.length/2];

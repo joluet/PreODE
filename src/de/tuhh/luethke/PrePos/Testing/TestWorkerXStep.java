@@ -17,31 +17,31 @@ public class TestWorkerXStep implements Callable<Double> {
 
 	private Measurement[] mMeasurements;
 	SampleModel mModel;
+	int coarseGridWidth; 
+	int coarseSegmentWidth; 
+	int coarseEvalSegments;
+	int fineSegmentWidth;
+	int fineEvalSegments;
+	int outputProbSquareWidth;
+	int outputProbSquareSegments;
 
-	public TestWorkerXStep(Measurement[] measurements, SampleModel model) {
-		try {
-			this.mModel = new SampleModel(model);
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		this.mMeasurements = measurements;
+	
+
+	public TestWorkerXStep(Measurement[] mMeasurements, SampleModel mModel, int coarseGridWidth, int coarseSegmentWidth, int coarseEvalSegments,
+			int fineSegmentWidth, int fineEvalSegments, int outputProbSquareWidth, int outputProbSquareSegments) {
+		super();
+		this.mMeasurements = mMeasurements;
+		this.mModel = mModel;
+		this.coarseGridWidth = coarseGridWidth;
+		this.coarseSegmentWidth = coarseSegmentWidth;
+		this.coarseEvalSegments = coarseEvalSegments;
+		this.fineSegmentWidth = fineSegmentWidth;
+		this.fineEvalSegments = fineEvalSegments;
+		this.outputProbSquareWidth = outputProbSquareWidth;
+		this.outputProbSquareSegments = outputProbSquareSegments;
 	}
+
+
 
 	@Override
 	public Double call() throws Exception {
@@ -66,7 +66,14 @@ public class TestWorkerXStep implements Callable<Double> {
 		for(int i=0; i<samples.length; i++){
 			samples[i] = mMeasurements[i];
 		}
-		Prediction pre = predictor.predict(samples);
+		Prediction pre = predictor.predict(samples, coarseGridWidth, coarseSegmentWidth, coarseEvalSegments,
+				fineSegmentWidth, fineEvalSegments, outputProbSquareWidth, outputProbSquareSegments);
+		
+		if(pre == null){
+			//System.out.println("Prediction was not possible. Too few data available.");
+			return null;
+		}
+			
 		
 		LatLng predictionPoint = new LatLng(pre.latitude, pre.longitude);
 		
@@ -94,8 +101,13 @@ public class TestWorkerXStep implements Callable<Double> {
 		}
 		
 		String probString = relDist+" "+pre.marginalProbability+" "+pre.probability+" "+pre.widerProbability;
-		
-		System.out.println(coordianteString+"\n"+distanceString+"\n"+probString);
+		/*if(pre.priorClosestMean != null){
+			//probString += "\n"+"***Mean closer than 5 by md: "+pre.closestMean;		
+			System.out.println(coordianteString+"\n"+distanceString+"\n"+probString+"\n"+pre.priorClosestMean);
+
+		}else
+			System.out.println("Prediction to inaccurate.");*/
+		System.out.println(coordianteString+"\n"+distanceString+"\n"+probString+"\n"/*+pre.priorClosestMean*/);
 		
 		return distances[distances.length-1];
 	}
