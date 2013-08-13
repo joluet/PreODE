@@ -430,9 +430,9 @@ public class TestGeneric {
 			m.set(0, 0, x[filtered.get(i)[0]]);
 			m.set(1, 0, y[filtered.get(i)[1]]);
 			weightedCoordinates.add(Preprocessor.projectDataBack(m));
-			double prob = dist.cummulativeConditional(pointVector1, m, 400, 2, 2);
-			z[filtered.get(i)[0]][filtered.get(i)[1]] = prob;
-			sum += prob;
+			//double prob = dist.cummulativeConditional(pointVector1, m, 400, 2, 2);
+			//z[filtered.get(i)[0]][filtered.get(i)[1]] = prob;
+			//sum += prob;
 			System.out.println(sum);
 		}
 		System.out.println("SUM=" + sum);
