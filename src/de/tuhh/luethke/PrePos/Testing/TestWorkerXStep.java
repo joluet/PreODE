@@ -1,7 +1,5 @@
 package de.tuhh.luethke.PrePos.Testing;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.javadocmd.simplelatlng.LatLng;
@@ -66,8 +64,7 @@ public class TestWorkerXStep implements Callable<Double> {
 		for(int i=0; i<samples.length; i++){
 			samples[i] = mMeasurements[i];
 		}
-		Prediction pre = predictor.predict(samples, coarseGridWidth, coarseSegmentWidth, coarseEvalSegments,
-				fineSegmentWidth, fineEvalSegments, outputProbSquareWidth, outputProbSquareSegments);
+		Prediction pre = predictor.predict(samples, coarseGridWidth, coarseSegmentWidth, outputProbSquareWidth, outputProbSquareSegments);
 		
 		if(pre == null){
 			//System.out.println("Prediction was not possible. Too few data available.");

@@ -41,10 +41,10 @@ public class TestOutputEvaluator {
 
 	public static void main(String[] args) {
 		// calculate sigma
-		LinkedList<Measurement> testData = CabDataPaser.parse("test_data/new_enyonsn.txt");
+		LinkedList<Measurement> testData = CabDataPaser.parse("test_data/new_ofikco.txt");
 		Preprocessor.processTestData(testData);
 		//System.out.println(testData.size());
-		List<SimpleMatrix> testDataVectors = PositionalTSTransformer.transformTSData1(testData, 3, 600, 30, 500);
+		List<SimpleMatrix> testDataVectors = PositionalTSTransformer.transformTSData1(testData, 3, 600, 30, 450);
 		Preprocessor.projectData(testDataVectors);
 
 		SimpleMatrix sigma = new SimpleMatrix(2,1);
@@ -93,7 +93,7 @@ public class TestOutputEvaluator {
 		ArrayList<SimpleMatrix> bestResults = new ArrayList<SimpleMatrix>();
 		for(int i=1; i<2; i++){
 			for(int j=0; j<1; j++) {
-				ArrayList<SimpleMatrix> results = readFromFile("test_data/significance/1"	);
+				ArrayList<SimpleMatrix> results = readFromFile("test_data/significance/new"	);
 				ArrayList<SimpleMatrix> worstResults = new ArrayList<SimpleMatrix>();
 		
 				int count = 0;
@@ -124,10 +124,11 @@ public class TestOutputEvaluator {
 						double norm = Compressor.euclidianDistance(act,mu);
 						RelMESList.add((addToMSE/norm));
 						if((addToMSE/norm)>0.3){
-							System.out.println((addToMSE/norm)+">0.3: "+m.get(4,0));
+							System.out.println((addToMSE/norm)+">0.3: "+m.get(5,0));
 							l++;
 						}
-						if(Math.sqrt(Compressor.euclidianDistance(pre,act)) < 500){
+						double dis = Math.sqrt(Compressor.euclidianDistance(pre,act));
+						if(Compressor.euclidianDistance(pre,act) < 500){
 							countSm1000++;
 							System.out.println("<500: "+m.get(4,0));
 						}
@@ -196,7 +197,7 @@ public class TestOutputEvaluator {
 				data = br.readLine();
 			}
 			while ((sCurrentLine = br.readLine()) != null) {
-				//sCurrentLine = br.readLine();
+				sCurrentLine = br.readLine();
 				sCurrentLine = br.readLine();
 				SimpleMatrix m = new SimpleMatrix(8, 1);
 				String[] posData = sCurrentLine.split(" | ");
