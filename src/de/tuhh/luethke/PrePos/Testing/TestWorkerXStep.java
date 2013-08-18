@@ -15,59 +15,37 @@ public class TestWorkerXStep implements Callable<Double> {
 
 	private Measurement[] mMeasurements;
 	SampleModel mModel;
-	int coarseGridWidth; 
-	int coarseSegmentWidth; 
-	int coarseEvalSegments;
-	int fineSegmentWidth;
-	int fineEvalSegments;
-	int outputProbSquareWidth;
-	int outputProbSquareSegments;
+	int searchRadius;
+	int searchSegmentDistance;
+	int accuracyRadius;
+	int predictionSegments;
 
 	
 
-	public TestWorkerXStep(Measurement[] mMeasurements, SampleModel mModel, int coarseGridWidth, int coarseSegmentWidth, int coarseEvalSegments,
-			int fineSegmentWidth, int fineEvalSegments, int outputProbSquareWidth, int outputProbSquareSegments) {
+	public TestWorkerXStep(Measurement[] mMeasurements, SampleModel mModel, int searchRadius, int searchSegmentDistance, int accuracyRadius,
+			int predictionSegments) {
 		super();
 		this.mMeasurements = mMeasurements;
 		this.mModel = mModel;
-		this.coarseGridWidth = coarseGridWidth;
-		this.coarseSegmentWidth = coarseSegmentWidth;
-		this.coarseEvalSegments = coarseEvalSegments;
-		this.fineSegmentWidth = fineSegmentWidth;
-		this.fineEvalSegments = fineEvalSegments;
-		this.outputProbSquareWidth = outputProbSquareWidth;
-		this.outputProbSquareSegments = outputProbSquareSegments;
+		this.searchRadius = searchRadius;
+		this.searchSegmentDistance = searchSegmentDistance;
+		this.accuracyRadius = accuracyRadius;
+		this.predictionSegments = predictionSegments;
 	}
 
 
 
 	@Override
 	public Double call() throws Exception {
-		/*long time = System.currentTimeMillis();
-		double[][] dxVector = new double[4][1];
-		dxVector[0][0] = mMeasurements.get(0).getLat();
-		dxVector[1][0] = mMeasurements.get(0).getLng();
-		dxVector[2][0] = mMeasurements.get(1).getLat();
-		dxVector[3][0] = mMeasurements.get(1).getLng();
-		SimpleMatrix pointVector = new SimpleMatrix(dxVector);
-		SimpleMatrix pointVector1 = Preprocessor.projectData4(pointVector);
-		dxVector = new double[2][1];
-		dxVector[0][0] = mMeasurements.get(2).getLat();
-		dxVector[1][0] = mMeasurements.get(2).getLng();
-		pointVector = new SimpleMatrix(dxVector);
-		SimpleMatrix pointVector2 = Preprocessor.projectData(pointVector);
-		double prob = mModel.trapezoidRule(pointVector1, pointVector2, 100, 100);
-		System.out.println("time: "+(System.currentTimeMillis()-time));
-		return prob;*/
 		Predictor predictor = new Predictor(mModel);
 		Measurement[] samples = new Measurement[mMeasurements.length-1];
 		for(int i=0; i<samples.length; i++){
 			samples[i] = mMeasurements[i];
 		}
-		Prediction pre = predictor.predict(samples, coarseGridWidth, coarseSegmentWidth, outputProbSquareWidth, outputProbSquareSegments);
+		Prediction pre = predictor.predict(samples, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments);
 		
 		if(pre == null){
-			//System.out.println("Prediction was not possible. Too few data available.");
+			System.out.println("Prediction was not possible. Too few data available.");
 			return null;
 		}
 			
@@ -98,13 +76,7 @@ public class TestWorkerXStep implements Callable<Double> {
 		}
 		
 		String probString = relDist+" "+pre.marginalProbability+" "+pre.probability+" "+pre.widerProbability;
-		/*if(pre.priorClosestMean != null){
-			//probString += "\n"+"***Mean closer than 5 by md: "+pre.closestMean;		
-			System.out.println(coordianteString+"\n"+distanceString+"\n"+probString+"\n"+pre.priorClosestMean);
-
-		}else
-			System.out.println("Prediction to inaccurate.");*/
-		System.out.println(coordianteString+"\n"+distanceString+"\n"+probString+"\n"/*+pre.priorClosestMean*/);
+		System.out.println(coordianteString+"\n"+distanceString+"\n"+probString+"\n");
 		
 		return distances[distances.length-1];
 	}

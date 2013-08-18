@@ -46,19 +46,17 @@ public class TestGeneric {
 		double compressionThreshold = Double.valueOf(args[7]);
 		String kdeFileName = args[8];
 		
-		//Grid parameters for evaluation of KDE
-		int coarseGridWidth = Integer.valueOf(args[9]);
-		int coarseSegmentWidth = Integer.valueOf(args[10]);
-		int coarseEvalSegments = Integer.valueOf(args[11]);
-		int fineSegmentWidth = Integer.valueOf(args[12]);
-		int fineEvalSegments = Integer.valueOf(args[13]);
-		int outputProbSquareWidth = Integer.valueOf(args[14]);
-		int outputProbSquareSegments = Integer.valueOf(args[15]);
+		//Parameters for evaluation of KDE and optimization
+		int searchRadius = Integer.valueOf(args[9]);
+		int searchSegmentDistance = Integer.valueOf(args[10]);
+		int accuracyRadius = Integer.valueOf(args[11]);
+		int predictionSegments = Integer.valueOf(args[12]);
+		
 		
 		//parameters for execution
-		int noOfWorkerThreads = Integer.valueOf(args[16]);
-		long maxUpdateTime = Long.valueOf(args[17])*60;
-		long maxPredictionTime = Long.valueOf(args[18])*60;
+		int noOfWorkerThreads = Integer.valueOf(args[13]);
+		long maxUpdateTime = Long.valueOf(args[14])*60;
+		long maxPredictionTime = Long.valueOf(args[15])*60;
 
 
 		String paramterInfoString = "Input data file: "+dataFileName+"\n";
@@ -68,15 +66,12 @@ public class TestGeneric {
 		paramterInfoString += "Prediction step size: "+stepSize+"s\n";
 		paramterInfoString += "Prediction step tolerance: "+tolerance+"s\n";
 		paramterInfoString += "oKDE forgetting factor: "+forgettingFactor+"\n";
-		paramterInfoString += "oKDE compression threshold: "+compressionThreshold+"\n";
+		paramterInfoString += "oKDE compression threshold: "+compressionThreshold+"\n\n";
 		
-		paramterInfoString += "Width of coarse square evaluation grid: "+coarseGridWidth+"\n";
-		paramterInfoString += "Width of coarse square evaluation segment: "+coarseSegmentWidth+"\n";
-		paramterInfoString += "Number of subsegments for coarse evaluation: "+coarseEvalSegments+"\n";
-		paramterInfoString += "Width of fine square evaluation grid: "+fineSegmentWidth+"\n";
-		paramterInfoString += "Number of subsegments for fine evaluation: "+fineEvalSegments+"\n";
-		paramterInfoString += "Width of square surface element to evaluate at maximum: "+outputProbSquareWidth+"\n";
-		paramterInfoString += "Number of subsegments for evaluation at maximum: "+outputProbSquareSegments+"\n";
+		paramterInfoString += "Radius to search for maxima during prediction: "+searchRadius+"\n";
+		paramterInfoString += "Distance that defines how fine-meshed the search for maxima: "+searchSegmentDistance+"\n";
+		paramterInfoString += "Radius to use when estimating the cumulative probability around a prediction point: "+accuracyRadius+"\n";
+		paramterInfoString += "Number of segements to be used during estimation of the cumulative probability: "+predictionSegments+"\n\n";
 		
 		paramterInfoString += "KDE output file name: "+kdeFileName+"\n";
 		paramterInfoString += "Number of worker threads: "+noOfWorkerThreads+"\n";
@@ -253,8 +248,7 @@ public class TestGeneric {
 		ArrayList<Future<Double>> futureResults = new ArrayList<Future<Double>>();
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkerThreads);
 		for (int i = testDataVectors.size()-noOfTestingSamples; i < testDataVectors.size(); i++) {
-			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, coarseGridWidth, coarseSegmentWidth, coarseEvalSegments,
-					fineSegmentWidth, fineEvalSegments, outputProbSquareWidth, outputProbSquareSegments);
+			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments);
 			futureResults.add(executor.submit(worker));
 		}
 		startTime = System.currentTimeMillis();

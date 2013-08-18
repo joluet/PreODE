@@ -8,8 +8,8 @@ import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.oKDE.model.ConditionalDistribution;
 import de.tuhh.luethke.oKDE.model.SampleModel;
-import de.tuhh.luethke.oKDE.utility.Optimization;
-import de.tuhh.luethke.oKDE.utility.SearchResult;
+import de.tuhh.luethke.oKDE.utility.Optimization.Optimization;
+import de.tuhh.luethke.oKDE.utility.Optimization.SearchResult;
 
 
 /**
@@ -238,9 +238,11 @@ public class Predictor {
 				marginalDistribution.conditionalWeights);
 
 		System.out.println("Loop time: " + (System.currentTimeMillis() - time));
-
-		SimpleMatrix prediction = Preprocessor.projectDataBack(maxPoint);
-		Prediction p = new Prediction(prediction.get(0, 0), prediction.get(1, 0), marginal, maxProbability, maxWiderProbability, 200);
+		Prediction p = null;
+		if(maxPoint != null){
+			SimpleMatrix prediction = Preprocessor.projectDataBack(maxPoint);
+			p = new Prediction(prediction.get(0, 0), prediction.get(1, 0), marginal, maxProbability, maxWiderProbability, accuracyRadius);
+		}
 		return p;
 	}
 
