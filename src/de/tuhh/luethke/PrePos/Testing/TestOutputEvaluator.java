@@ -110,15 +110,19 @@ public class TestOutputEvaluator {
 		double probBetterThan1000=0;
 
 		double avg02 = 0;
-		ArrayList<SimpleMatrix> bestResults = new ArrayList<SimpleMatrix>();
-		final File folder = new File("test_data/1608/4_10/");
+		ArrayList<Double> errors = new ArrayList<Double>();
+		ArrayList<Double> predictionReliabilities = new ArrayList<Double>();
+		ArrayList<Double> relativeErrorOfRight = new ArrayList<Double>();
+
+
+
+		final File folder = new File("/home/jonas/Dokumente/Masterarbeit/AWS/jonas/");
 		ArrayList<String> fileNames = listFilesForFolder(folder);
 		for (int i = 0; i < fileNames.size(); i++) {
-			ArrayList<SimpleMatrix> results = readFromFile("test_data/1608/4_10/" + fileNames.get(i));
+			ArrayList<SimpleMatrix> results = readFromFile("/home/jonas/Dokumente/Masterarbeit/AWS/jonas/" + fileNames.get(i));
 //			String trainingDataFileName = readTrainingDataFileName("test_data/1608/4_10/" + fileNames.get(i));
 //			if(trainingDataFileName.contains("1"))
 //				trainingDataFileName = trainingDataFileName.replace("1", "");
-			ArrayList<SimpleMatrix> worstResults = new ArrayList<SimpleMatrix>();
 			ArrayList<Double> RelMESList = new ArrayList<Double>();
 
 //			LinkedList<Measurement> trainingData = CabDataPaser.parse("test_data/"+trainingDataFileName);
@@ -165,11 +169,12 @@ public class TestOutputEvaluator {
 //					variance += norm;
 
 //					RelMESList.add((addToMSE / norm));
-					
+					predictionReliabilities.add(m.get(5, 0));
 					probBetterThan1000+=m.get(5, 0);
-					if (Compressor.euclidianDistance(pre, act) < 1000) {
+					errors.add(Compressor.euclidianDistance(pre, act));
+					if (Compressor.euclidianDistance(pre, act) <= 1500) {
 						countSm1000++;
-						
+						relativeErrorOfRight.add(relError);
 					}
 					for (int j = 0; j < 10; j++) {
 
@@ -177,8 +182,6 @@ public class TestOutputEvaluator {
 							double error = relativeErrorDistribution.get(j);
 							error++;
 							relativeErrorDistribution.set(j, error);
-							if (j == 3)
-								bestResults.add(m);
 						}
 					}
 					count1++;
@@ -209,10 +212,84 @@ public class TestOutputEvaluator {
 		avg02 /= fileNames.size();
 		System.out.println(avg02);
 		System.out.println("avg better than 1km: "+avgBetterThan1000);
-		System.out.println(probBetterThan1000/k);
+		System.out.println("predicted: "+(probBetterThan1000/k) + "("+k+")");
+		double meanError = 0;
+		double meanErrorOfRight = 0;
+		double errorOfRightCount = 0;
+		double meanSquaredErrorOfRight = 0;
+		double meanSquaredError = 0;
+		double errorCount = 0;
+		ArrayList<Double> realErrorList = new ArrayList<Double>();
+		for(double error : errors) {
+			meanError += error;
+			if(error > 1000) {
+				meanSquaredError += ((error-1000)*(error-1000));
+				errorCount++;
+				meanError += (error-1000);
+				realErrorList.add(error - 1000d);
+			}else {
+				meanErrorOfRight += error;
+				meanSquaredErrorOfRight += (error*error);
+				errorOfRightCount++;
+			}
+				
+		}
+		meanErrorOfRight /= errorOfRightCount;
+		System.out.println("good predictions error mean: "+meanErrorOfRight);
+		Double[] realErrorArray = realErrorList.toArray(new Double[0]);
+		Arrays.sort(realErrorArray);
+		double errorMedian = realErrorArray[realErrorArray.length/2];
+		System.out.println("error median: "+errorMedian);
+		meanError /= errorCount;
+		meanSquaredError /= errorCount;
+		System.out.println("Error mean "+meanError);
+		double errorVariance = 0;
+		double errorVarianceOfRight = 0;
+		
+		// error distribution
+		Double[] errorsSorted = errors.toArray(new Double[0]);
+		Arrays.sort(errorsSorted);
+		double[] errorsSortedSubSet = new double[(errorsSorted.length/10)+1];
+		for(int i=0; i<errorsSorted.length; i++){
+			if(i%10 == 0)
+				errorsSortedSubSet[i/10]=errorsSorted[i]; 
+		}
+		errorsToFile(errorsSortedSubSet, "errors.txt");
+		
+		// prediction reliability
+		Double[] sortedPredictionReliabilities = predictionReliabilities.toArray(new Double[0]);
+		Arrays.sort(sortedPredictionReliabilities);
+		double[] sortedPredictionReliabilitiesSubSet = new double[(sortedPredictionReliabilities.length/5)+1];
+		for(int i=0; i<sortedPredictionReliabilities.length; i++){
+			if(i%5 == 0)
+				sortedPredictionReliabilitiesSubSet[i/5]=sortedPredictionReliabilities[i]; 
+		}
+		errorsToFile(errorsSortedSubSet, "predictionReliabilities.txt");
 
-		measurementsToHeatMapFile(bestResults);
+		//relative error of right
+		Double[] sortedRelativeErrorOfRight = relativeErrorOfRight.toArray(new Double[0]);
+		Arrays.sort(sortedRelativeErrorOfRight);
+		/*double[] sortedRelativeErrorOfRightSubSet = new double[(sortedRelativeErrorOfRight.length/5)+1];
+		for(int i=0; i<sortedRelativeErrorOfRight.length; i++){
+			if(i%5 == 0)
+				sortedRelativeErrorOfRightSubSet[i/5]=sortedRelativeErrorOfRight[i]; 
+		}*/
+		errorsToFile(sortedRelativeErrorOfRight, "sortedRelativeErrorOfRight.txt");
+		
+		for(double error : errors) {
+			if(error > 1000) {
+				error = error - 1000;
+				errorVariance += ((error - meanError)*(error - meanError));
+			}else{
+				errorVarianceOfRight += ((error - meanError)*(error - meanError));
+			}
+		}
+		errorVariance /= ((double)errors.size());
+		System.out.println("predictability: "+(meanSquaredError/errorVariance));
+		System.out.println("predictability 1: "+(meanSquaredErrorOfRight/errorVarianceOfRight));
 
+		errorVariance = Math.sqrt(errorVariance);
+		System.out.println("Error variance: "+errorVariance);
 	}
 
 	public static ArrayList<String> listFilesForFolder(final File folder) {
@@ -245,6 +322,8 @@ public class TestOutputEvaluator {
 					sCurrentLine = br.readLine();
 				if (sCurrentLine.startsWith("Time"))
 					break;
+				while (!sCurrentLine.contains("|"))
+					sCurrentLine = br.readLine();
 				String[] posData = sCurrentLine.split(" | ");
 				m.set(6, 0, Double.valueOf(posData[9]));
 				m.set(7, 0, Double.valueOf(posData[10]));
@@ -305,6 +384,69 @@ public class TestOutputEvaluator {
 		}
 		return trainingDataFileName;
 
+	}
+	
+	private static void errorsToFile(double[] errors, String filename) {
+		PrintWriter pw = null;
+		try {
+			Writer fw = new FileWriter(filename);
+			Writer bw = new BufferedWriter(fw);
+			pw = new PrintWriter(bw);
+			double cumulative = 0;
+			pw.println("x y");
+			for (int i=0; i<errors.length; i++){
+				cumulative += 1d/(double)errors.length;
+				pw.println(errors[i]+" "+cumulative);
+			}
+		}
+
+		catch (IOException e) {
+			System.err.println("Error creating file!");
+		} finally {
+			if (pw != null)
+				pw.close();
+		}
+	}
+	private static void errorsToFile(Double[] errors, String filename) {
+		PrintWriter pw = null;
+		try {
+			Writer fw = new FileWriter(filename);
+			Writer bw = new BufferedWriter(fw);
+			pw = new PrintWriter(bw);
+			double cumulative = 0;
+			pw.println("x y");
+			for (int i=0; i<errors.length; i++){
+				cumulative += 1d/(double)errors.length;
+				pw.println(errors[i]+" "+cumulative);
+			}
+		}
+
+		catch (IOException e) {
+			System.err.println("Error creating file!");
+		} finally {
+			if (pw != null)
+				pw.close();
+		}
+	}
+	private static void predictionReliabilitiesToFile(double[] predictionReliabilities) {
+		PrintWriter pw = null;
+		try {
+			Writer fw = new FileWriter("predictionReliabilities.txt");
+			Writer bw = new BufferedWriter(fw);
+			pw = new PrintWriter(bw);
+			double cumulative = 0;
+			for (int i=0; i<predictionReliabilities.length; i++){
+				cumulative += 1d/(double)predictionReliabilities.length;
+				pw.println(predictionReliabilities[i]+" "+cumulative);
+			}
+		}
+
+		catch (IOException e) {
+			System.err.println("Error creating file!");
+		} finally {
+			if (pw != null)
+				pw.close();
+		}
 	}
 
 	private static void measurementsToHeatMapFile(List<SimpleMatrix> data) {

@@ -37,7 +37,7 @@ public class LatitudeHistoryParser {
 	    String t = times.get(i);
 	    String c = coordinates.get(i);
 
-	    Long time = StringUtils.getTime(t);
+	    Long time = StringUtils.getTime(t)/1000;
 
 	    String[] coords = c.split(" ");
 

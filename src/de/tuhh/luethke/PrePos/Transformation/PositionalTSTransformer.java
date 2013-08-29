@@ -84,7 +84,7 @@ public class PositionalTSTransformer {
 					 * Measurement swap = batch[1]; batch[1] = batch[0];
 					 * batch[0] = swap; }
 					 */
-				} else if (Math.abs(timeDiff) > MAX_TIME_DIFF_SEC)
+				} else if (Math.abs(timeDiff) > (stepSize+tolerance))
 					// when time difference gets to big --> break!
 					break;
 			}
@@ -123,7 +123,7 @@ public class PositionalTSTransformer {
 					 * Measurement swap = batch[1]; batch[1] = batch[0];
 					 * batch[0] = swap; }
 					 */
-				} else if (Math.abs(timeDiff) > MAX_TIME_DIFF_SEC)
+				} else if (Math.abs(timeDiff) > (stepSize+tolerance))
 					// when time difference gets to big --> break!
 					break;
 			}

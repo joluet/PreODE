@@ -23,6 +23,7 @@ import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
 import de.tuhh.luethke.PrePos.Transformation.Postprocessor;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
 import de.tuhh.luethke.PrePos.utility.CabDataPaser;
+import de.tuhh.luethke.PrePos.utility.LatitudeHistoryParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
 import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
@@ -83,7 +84,8 @@ public class TestGeneric {
 		// print info
 		System.out.println(paramterInfoString);
 		
-		LinkedList<Measurement> testData = CabDataPaser.parse(dataFileName);
+		//LinkedList<Measurement> testData = CabDataPaser.parse(dataFileName);
+		LinkedList<Measurement> testData = LatitudeHistoryParser.parse(dataFileName);
 		Preprocessor.processTestData(testData);
 		//System.out.println(testData.size());
 		List<Measurement[]> testDataVectors = PositionalTSTransformer.transformTSDataMeasurements(testData, predictionSteps, stepSize, tolerance, overallSamples);
@@ -93,13 +95,13 @@ public class TestGeneric {
 		// System.out.println(measurements.size());
 		// for (Measurement m : measurements)
 		// System.out.println(m.getLat() + " " + m.getLng());
-		//measurementsToHeatMapFile(testDataVectors);
+		
 		System.out.println("$-----------------------------------------------------------------");
 
 		List<SimpleMatrix> posVectors = PositionalTSTransformer.transformTSData1(testData, predictionSteps, stepSize, tolerance, overallSamples);
 		System.out.println("Extracted "+testDataVectors.size()+" possible test- and learning-vectors.");
 		System.out.println("Start learning...\n");
-
+		dataToHeatMapFile(posVectors);
 
 		if(posVectors.size() < (noOfLearningSamples + noOfTestingSamples)){
 			System.out.println("To few data vectors could be extracted from data set!");

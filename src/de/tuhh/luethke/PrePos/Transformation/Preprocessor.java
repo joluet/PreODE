@@ -54,7 +54,8 @@ public class Preprocessor {
 	public static SimpleMatrix projectDataBack(SimpleMatrix m) {
 		SimpleMatrix m1 = new SimpleMatrix(m);
 		for(int i=0; i<m.numRows()-1; i+=2) {
-			UTMRef utm = new UTMRef(10,'S',(float) m1.get(i, 0), (float) m1.get(i+1, 0));
+			//UTMRef utm = new UTMRef(10,'S',(float) m1.get(i, 0), (float) m1.get(i+1, 0));
+			UTMRef utm = new UTMRef(32,'U',(float) m1.get(i, 0), (float) m1.get(i+1, 0));
 			LatLng ll = utm.toLatLng();
 			double lat = ll.getLatitude();
 			double lng = ll.getLongitude();
