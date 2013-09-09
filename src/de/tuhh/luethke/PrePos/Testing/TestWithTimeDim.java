@@ -20,7 +20,7 @@ import org.math.plot.Plot3DPanel;
 
 import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
-import de.tuhh.luethke.PrePos.utility.CabDataPaser;
+import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
 import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
@@ -32,11 +32,11 @@ public class TestWithTimeDim {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		LinkedList<Measurement> testData = CabDataPaser.parse("new_uvjeahot_tst_1.txt");
+		LinkedList<Measurement> testData = CabDataParser.parse("new_uvjeahot_tst_1.txt");
 		testDataToFile(testData);
 		
 		
-		LinkedList<Measurement> measurements = CabDataPaser.parse("new_uvjeahot.txt");//LatitudeHistoryParser.parse("jonas.kml");
+		LinkedList<Measurement> measurements = CabDataParser.parse("new_uvjeahot.txt");//LatitudeHistoryParser.parse("jonas.kml");
 		Preprocessor.processData(measurements);
 		//System.out.println(measurements.size());
 		//for (Measurement m : measurements)

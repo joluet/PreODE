@@ -6,11 +6,23 @@ import com.javadocmd.simplelatlng.util.LengthUnit;
 
 public class Measurement {
 
+	public int getFare() {
+		return mFare;
+	}
+
+	public void setFare(int mFare) {
+		this.mFare = mFare;
+	}
+
 	private final int FACTOR_10E6 = 1000000;
 	private final double EARTH_RADIUS = 6371;
 
 	private double mLat;
 	private double mLng;
+	private int mFare;
+	private double mSpeed;
+	private int mTimeOfDay;
+
 	private long mDate;
 
 	public Measurement(double lat, double lng, long date) {
@@ -18,6 +30,30 @@ public class Measurement {
 		this.mLat = lat;
 		this.mLng = lng;
 		this.mDate = date;
+	}
+	
+	public Measurement(double lat, double lng, int fare, long date) {
+		super();
+		this.mLat = lat;
+		this.mLng = lng;
+		this.mDate = date;
+		this.mFare = fare;
+	}
+
+	public double getSpeed() {
+		return mSpeed;
+	}
+
+	public void setSpeed(double mSpeed) {
+		this.mSpeed = mSpeed;
+	}
+
+	public int getTimeOfDay() {
+		return mTimeOfDay;
+	}
+
+	public void setTimeOfDay(int mTimeOfDay) {
+		this.mTimeOfDay = mTimeOfDay;
 	}
 
 	public Measurement(Measurement m) {

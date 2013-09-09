@@ -1,5 +1,6 @@
 package de.tuhh.luethke.PrePos.Transformation;
 
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,9 @@ import de.tuhh.luethke.projection.PVector;
  */
 public class Preprocessor {
 
-	private final static double MAX_SPEED = 35d;// 122.5km/h
+	private final static int MIN_DISTANCE = 50;// 5m
+	
+	private final static double MAX_SPEED = 40d;// 144km/h
 	
 	private final static double MIN_TIME_DIFF = 10d;// 10s
 	
@@ -40,6 +43,14 @@ public class Preprocessor {
 			measurements.set(i, m);
 		}
 	}
+	
+	public static void projectDataFirstOrder(List<SimpleMatrix> measurements) {
+		for (int i = 0; i < measurements.size(); i++) {
+			SimpleMatrix m = measurements.get(i);
+			m = projectDataFO(m);
+			measurements.set(i, m);
+		}
+	}
 
 	/*public static SimpleMatrix projectData(SimpleMatrix m) {
 		SimpleMatrix m1 = new SimpleMatrix(m);
@@ -51,11 +62,12 @@ public class Preprocessor {
 		return m1;
 	}*/
 	
-	public static SimpleMatrix projectDataBack(SimpleMatrix m) {
+	public static SimpleMatrix projectDataBack(SimpleMatrix m, int zoneNo, char zoneLetter) {
 		SimpleMatrix m1 = new SimpleMatrix(m);
 		for(int i=0; i<m.numRows()-1; i+=2) {
 			//UTMRef utm = new UTMRef(10,'S',(float) m1.get(i, 0), (float) m1.get(i+1, 0));
-			UTMRef utm = new UTMRef(32,'U',(float) m1.get(i, 0), (float) m1.get(i+1, 0));
+			//UTMRef utm = new UTMRef(32,'U',(float) m1.get(i, 0), (float) m1.get(i+1, 0));
+			UTMRef utm = new UTMRef(zoneNo,zoneLetter,(float) m1.get(i, 0), (float) m1.get(i+1, 0));
 			LatLng ll = utm.toLatLng();
 			double lat = ll.getLatitude();
 			double lng = ll.getLongitude();
@@ -116,7 +128,17 @@ public class Preprocessor {
 		return m;
 	}
 	
-
+	public static SimpleMatrix projectDataFO(SimpleMatrix m) {
+		//SimpleMatrix m1 = new SimpleMatrix(m);
+		for(int i=0; i<(m.numRows()); i+=5) {
+			LatLng ll = new LatLng((float) m.get(i, 0), (float) m.get(i+1, 0));
+			double easting = ll.toUTMRef().getEasting();
+			double northing = ll.toUTMRef().getNorthing();
+			m.set(i, 0, easting);
+			m.set(i+1, 0, northing);
+		}
+		return m;
+	}
 
 	/**
 	 * Filters given measurement data by speed, time difference and minimum distance.
@@ -141,7 +163,7 @@ public class Preprocessor {
 		System.out.println(count + " Datenpunkte entfernt!");
 	}
 	
-	public static void processTestData(LinkedList<Measurement> measurements) {
+	public static void processTestData(LinkedList<Measurement> measurements, int useOnlyCabsWithPassenger, int useParticularToD) {
 		Measurement tmp = null;
 		int count = 0;
 		tmp = measurements.poll();
@@ -149,13 +171,32 @@ public class Preprocessor {
 			Measurement m = (Measurement) i.next();
 			double distance = m.distanceInMeters(tmp);
 			double timeDiff = m.timeDiffInSeconds(tmp);
-			if (distance < 50) {
+			double speed = distance / timeDiff;
+			m.setSpeed(speed);
+			int fare = useOnlyCabsWithPassenger;
+			if(useOnlyCabsWithPassenger != 2)
+				fare = m.getFare();
+			int toD = useParticularToD;
+			if(useParticularToD != -1){
+				toD = m.getTimeOfDay();
+				if(toD >= 6 && toD < 12)
+					toD = 1;
+				else if(toD >= 12 && toD < 18)
+					toD = 2;
+				else if(toD >= 18 && toD < 24)
+					toD = 3;
+				else if(toD >= 0 && toD < 6)
+					toD = 4;
+			}
+			if (distance < MIN_DISTANCE || speed > MAX_SPEED || fare != useOnlyCabsWithPassenger
+					|| toD != useParticularToD) {
 				i.remove();
 				count++;
 			} else
 				tmp = new Measurement(m);
 		}
-		System.out.println(count + " data points removed by preprocessor! (distance < 50m)");
+		System.out.println(count + " data points removed by preprocessor! (distance < "+MIN_DISTANCE+"m or speed > "+MAX_SPEED*3.6+"km/h)");
 	}
+	
 
 }

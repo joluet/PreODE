@@ -22,9 +22,10 @@ import org.ejml.simple.SimpleMatrix;
 import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
 import de.tuhh.luethke.PrePos.Transformation.Postprocessor;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
-import de.tuhh.luethke.PrePos.utility.CabDataPaser;
+import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.LatitudeHistoryParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
+import de.tuhh.luethke.PrePos.utility.PLTParser;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
 import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
 import de.tuhh.luethke.oKDE.model.SampleModel;
@@ -36,28 +37,31 @@ public class TestGeneric {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-		String dataFileName = args[0];
-		int noOfLearningSamples = Integer.valueOf(args[1]);
-		int noOfTestingSamples = Integer.valueOf(args[2]);
-		int predictionSteps = Integer.valueOf(args[3]);
-		int stepSize = Integer.valueOf(args[4]);
-		int tolerance = Integer.valueOf(args[5]);
-		double forgettingFactor = Double.valueOf(args[6]);
-		double compressionThreshold = Double.valueOf(args[7]);
-		String kdeFileName = args[8];
+		int argCount = 0;
+		String dataFileName = args[argCount++];
+		int noOfLearningSamples = Integer.valueOf(args[argCount++]);
+		int noOfTestingSamples = Integer.valueOf(args[argCount++]);
+		int predictionSteps = Integer.valueOf(args[argCount++]);
+		int stepSize = Integer.valueOf(args[argCount++]);
+		int tolerance = Integer.valueOf(args[argCount++]);
+		double forgettingFactor = Double.valueOf(args[argCount++]);
+		double compressionThreshold = Double.valueOf(args[argCount++]);
+		int useOnlyCabsWithPassenger = Integer.valueOf(args[argCount++]);
+		int useParticularToD = Integer.valueOf(args[argCount++]);
+
+		String kdeFileName = args[argCount++];
 		
 		//Parameters for evaluation of KDE and optimization
-		int searchRadius = Integer.valueOf(args[9]);
-		int searchSegmentDistance = Integer.valueOf(args[10]);
-		int accuracyRadius = Integer.valueOf(args[11]);
-		int predictionSegments = Integer.valueOf(args[12]);
+		int searchRadius = Integer.valueOf(args[argCount++]);
+		int searchSegmentDistance = Integer.valueOf(args[argCount++]);
+		int accuracyRadius = Integer.valueOf(args[argCount++]);
+		int predictionSegments = Integer.valueOf(args[argCount++]);
 		
 		
 		//parameters for execution
-		int noOfWorkerThreads = Integer.valueOf(args[13]);
-		long maxUpdateTime = Long.valueOf(args[14])*60;
-		long maxPredictionTime = Long.valueOf(args[15])*60;
+		int noOfWorkerThreads = Integer.valueOf(args[argCount++]);
+		long maxUpdateTime = Long.valueOf(args[argCount++])*60;
+		long maxPredictionTime = Long.valueOf(args[argCount++])*60;
 
 
 		String paramterInfoString = "Input data file: "+dataFileName+"\n";
@@ -68,6 +72,8 @@ public class TestGeneric {
 		paramterInfoString += "Prediction step tolerance: "+tolerance+"s\n";
 		paramterInfoString += "oKDE forgetting factor: "+forgettingFactor+"\n";
 		paramterInfoString += "oKDE compression threshold: "+compressionThreshold+"\n\n";
+		paramterInfoString += "Use only cabs with passengers (1=yes, 0=no, 2=both): "+useOnlyCabsWithPassenger+"\n";
+		paramterInfoString += "Use only data from particular time of day (0=[06-12],1=[12-18],2=[18-00],3=[00-06]): "+useParticularToD+"\n\n";
 		
 		paramterInfoString += "Radius to search for maxima during prediction: "+searchRadius+"\n";
 		paramterInfoString += "Distance that defines how fine-meshed the search for maxima: "+searchSegmentDistance+"\n";
@@ -84,10 +90,28 @@ public class TestGeneric {
 		// print info
 		System.out.println(paramterInfoString);
 		
-		//LinkedList<Measurement> testData = CabDataPaser.parse(dataFileName);
-		LinkedList<Measurement> testData = LatitudeHistoryParser.parse(dataFileName);
-		Preprocessor.processTestData(testData);
-		//System.out.println(testData.size());
+		// UTM zones are hardcoded for file types!:
+		/*int UTMZoneNumber = 0;
+		char  UTMZoneLetter = ' ';
+		LinkedList<Measurement> testData = null;
+		if(dataFileName.endsWith(".txt")){
+			// San Francisco
+			UTMZoneNumber = 10;
+			UTMZoneLetter = 'S';
+			testData = CabDataParser.parseExtended(dataFileName);
+		}else if(dataFileName.endsWith(".kml")){
+			// Hamburg
+			UTMZoneNumber = 32;
+			UTMZoneLetter = 'U';
+			testData = LatitudeHistoryParser.parse(dataFileName);
+		}else if(dataFileName.contains("plt")){
+			// Beijing
+			UTMZoneNumber = 50;
+			UTMZoneLetter = 'S';
+			testData = PLTParser.parse(dataFileName);
+		}
+		System.out.println(testData.size()+" samples found.");
+		Preprocessor.processTestData(testData, useOnlyCabsWithPassenger, useParticularToD);
 		List<Measurement[]> testDataVectors = PositionalTSTransformer.transformTSDataMeasurements(testData, predictionSteps, stepSize, tolerance, overallSamples);
 
 
@@ -100,7 +124,13 @@ public class TestGeneric {
 
 		List<SimpleMatrix> posVectors = PositionalTSTransformer.transformTSData1(testData, predictionSteps, stepSize, tolerance, overallSamples);
 		System.out.println("Extracted "+testDataVectors.size()+" possible test- and learning-vectors.");
-		System.out.println("Start learning...\n");
+		System.out.println("Start learning...\n");*/
+		int UTMZoneNumber = 10;
+		char UTMZoneLetter = 'S';
+		String trainingDataFileName = dataFileName;
+		ArrayList<SimpleMatrix> posVectors = readTrainingData(trainingDataFileName);
+		List<Measurement[]> testDataVectors = toMeasurements(posVectors);
+		
 		dataToHeatMapFile(posVectors);
 
 		if(posVectors.size() < (noOfLearningSamples + noOfTestingSamples)){
@@ -250,7 +280,7 @@ public class TestGeneric {
 		ArrayList<Future<Double>> futureResults = new ArrayList<Future<Double>>();
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkerThreads);
 		for (int i = testDataVectors.size()-noOfTestingSamples; i < testDataVectors.size(); i++) {
-			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments);
+			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter, false);
 			futureResults.add(executor.submit(worker));
 		}
 		startTime = System.currentTimeMillis();
@@ -360,7 +390,7 @@ public class TestGeneric {
 	 * return z; }
 	 */
 
-	public static double[][] calculateY1(double[] x, double[] y, double setX, double setY, double setX1, double setY1, SampleModel dist,
+	/*public static double[][] calculateY1(double[] x, double[] y, double setX, double setY, double setX1, double setY1, SampleModel dist,
 			ArrayList<SimpleMatrix> weightedCoordinates, boolean swap) {
 		double[][] z = new double[x.length][y.length];
 		ExecutorService executor = Executors.newFixedThreadPool(8);
@@ -397,7 +427,7 @@ public class TestGeneric {
 				 * SimpleMatrix(m)); }
 				 */
 
-			}
+		/*	}
 		}
 
 		for (int i = 0; i < futureResults.size(); i++) {
@@ -434,6 +464,50 @@ public class TestGeneric {
 		System.out.println("SUM=" + sum);
 		dataToHeatMapFile(weightedCoordinates);
 		return z;
+	}*/
+	
+	private static ArrayList<SimpleMatrix> readTrainingData(String filename) {
+		BufferedReader br = null;
+		ArrayList<SimpleMatrix> dataArray = new ArrayList<SimpleMatrix>();
+
+		try {
+			String sCurrentLine;
+
+			br = new BufferedReader(new FileReader(filename));
+			while ((sCurrentLine = br.readLine()) != null) {
+				sCurrentLine = sCurrentLine.trim();
+				String[] posData = sCurrentLine.split(" ");
+				SimpleMatrix m = new SimpleMatrix(posData.length,1);
+				for(int i=0; i<posData.length; i++)
+					m.set(i,0,Double.parseDouble(posData[i]));
+				dataArray.add(m);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (br != null)
+					br.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+
+		}
+		return dataArray;
+
+	}
+	
+	private static List<Measurement[]> toMeasurements(ArrayList<SimpleMatrix> vectors) {
+		List<Measurement[]> measurements = new ArrayList<Measurement[]>();
+		for(SimpleMatrix m : vectors) {
+			Measurement[] batch = new Measurement[m.numRows()/2];
+			for(int i=0; i<m.numRows()-1; i+=2){
+				Measurement meas = new Measurement(m.get(i,0), m.get(i+1,0), 0);
+				batch[i/2] = meas;
+			}
+			measurements.add(batch);
+		}
+		return measurements;
 	}
 
 	private static void dataToFile(List<SimpleMatrix> data) {

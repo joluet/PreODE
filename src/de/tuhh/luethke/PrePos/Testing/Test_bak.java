@@ -19,7 +19,7 @@ import org.math.plot.Plot3DPanel;
 
 import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
-import de.tuhh.luethke.PrePos.utility.CabDataPaser;
+import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.LatitudeHistoryParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
@@ -32,7 +32,7 @@ public class Test_bak {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		LinkedList<Measurement> measurements = CabDataPaser.parse("new_uvjeahot_tst.txt");// LatitudeHistoryParser.parse("jonas.kml");
+		LinkedList<Measurement> measurements = CabDataParser.parse("new_uvjeahot_tst.txt");// LatitudeHistoryParser.parse("jonas.kml");
 		Preprocessor.processData(measurements);
 		// Postprocessor.projectData(measurements);
 		// System.out.println(measurements.size());

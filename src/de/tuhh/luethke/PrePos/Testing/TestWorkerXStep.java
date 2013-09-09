@@ -19,11 +19,14 @@ public class TestWorkerXStep implements Callable<Double> {
 	int searchSegmentDistance;
 	int accuracyRadius;
 	int predictionSegments;
+	int UTMZoneNo;
+	char UTMZoneLetter;
+	boolean mUseAdditionalInfo;
 
 	
 
 	public TestWorkerXStep(Measurement[] mMeasurements, SampleModel mModel, int searchRadius, int searchSegmentDistance, int accuracyRadius,
-			int predictionSegments) {
+			int predictionSegments, int UTMZoneNo, char UTMZoneLetter, boolean useAdditionalInfo) {
 		super();
 		this.mMeasurements = mMeasurements;
 		this.mModel = mModel;
@@ -31,6 +34,9 @@ public class TestWorkerXStep implements Callable<Double> {
 		this.searchSegmentDistance = searchSegmentDistance;
 		this.accuracyRadius = accuracyRadius;
 		this.predictionSegments = predictionSegments;
+		this.UTMZoneNo = UTMZoneNo;
+		this.UTMZoneLetter = UTMZoneLetter;
+		this.mUseAdditionalInfo = useAdditionalInfo;
 	}
 
 
@@ -42,7 +48,7 @@ public class TestWorkerXStep implements Callable<Double> {
 		for(int i=0; i<samples.length; i++){
 			samples[i] = mMeasurements[i];
 		}
-		Prediction pre = predictor.predict(samples, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments);
+		Prediction pre = predictor.predict(samples, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNo, UTMZoneLetter, mUseAdditionalInfo);
 		
 		if(pre == null){
 			System.out.println("Prediction was not possible. Too few data available.");

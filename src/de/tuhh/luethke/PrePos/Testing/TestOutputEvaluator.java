@@ -14,13 +14,16 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ejml.data.Matrix64F;
+import org.ejml.ops.MatrixComponent;
 import org.ejml.simple.SimpleMatrix;
 
 import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
-import de.tuhh.luethke.PrePos.utility.CabDataPaser;
+import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.oKDE.utility.Compression.Compressor;
+import de.tuhh.luethke.oKDE.utility.Matrices.MatrixOps;
 
 class SimpleMatrixComp implements Comparator<SimpleMatrix> {
 	@Override
@@ -106,6 +109,7 @@ public class TestOutputEvaluator {
 		 * distance * distance * (1/N); }
 		 */
 		double k = 0;
+		double meanRightAll = 0;
 		double avgBetterThan1000=0;
 		double probBetterThan1000=0;
 
@@ -114,18 +118,31 @@ public class TestOutputEvaluator {
 		ArrayList<Double> predictionReliabilities = new ArrayList<Double>();
 		ArrayList<Double> relativeErrorOfRight = new ArrayList<Double>();
 
+		ArrayList<SimpleMatrix> wrongResults = new ArrayList<SimpleMatrix>();
+		ArrayList<SimpleMatrix> rightResults = new ArrayList<SimpleMatrix>();
+		ArrayList<SimpleMatrix> referencePositions = new ArrayList<SimpleMatrix>();
 
 
-		final File folder = new File("/home/jonas/Dokumente/Masterarbeit/AWS/jonas/");
+
+		final File folder = new File("/home/jonas/Dokumente/Masterarbeit/AWS/results/3_30/tmp/");
 		ArrayList<String> fileNames = listFilesForFolder(folder);
+		
+		
+		SimpleMatrix mse = new SimpleMatrix(2, 1);
+		SimpleMatrix pre = new SimpleMatrix(2, 1);
+		SimpleMatrix act = new SimpleMatrix(2, 1);
+		
+		
+		
 		for (int i = 0; i < fileNames.size(); i++) {
-			ArrayList<SimpleMatrix> results = readFromFile("/home/jonas/Dokumente/Masterarbeit/AWS/jonas/" + fileNames.get(i));
-//			String trainingDataFileName = readTrainingDataFileName("test_data/1608/4_10/" + fileNames.get(i));
+			String cabFileName = readInfoFromFile("/home/jonas/Dokumente/Masterarbeit/AWS/results/3_30/tmp/" + fileNames.get(i));
+			System.out.println(cabFileName);
+			ArrayList<SimpleMatrix> results = readFromFile("/home/jonas/Dokumente/Masterarbeit/AWS/results/3_30/tmp/" + fileNames.get(i));
+			String trainingDataFileName = readTrainingDataFileName("/home/jonas/Dokumente/Masterarbeit/AWS/results/3_30/tmp/" + fileNames.get(i));
 //			if(trainingDataFileName.contains("1"))
 //				trainingDataFileName = trainingDataFileName.replace("1", "");
 			ArrayList<Double> RelMESList = new ArrayList<Double>();
 
-//			LinkedList<Measurement> trainingData = CabDataPaser.parse("test_data/"+trainingDataFileName);
 //			List<SimpleMatrix> trainingDataVectors = PositionalTSTransformer.transformTSData1(trainingData, 4, 900, 30, 4500);
 			// calc mu
 /*			SimpleMatrix tmp = new SimpleMatrix(2, 1);
@@ -140,27 +157,49 @@ public class TestOutputEvaluator {
 */
 			int countSm1000 = 0;
 			double mse1 = 0;
+			double meanRight = 0;
 
 			double count1 = 0;
-			SimpleMatrix mse = new SimpleMatrix(2, 1);
-			SimpleMatrix pre = new SimpleMatrix(2, 1);
-			SimpleMatrix act = new SimpleMatrix(2, 1);
+			
+
 			ArrayList<Double> relativeErrorDistribution =new ArrayList<Double>();
 			for (int j = 0; j < 10; j++) {
 				relativeErrorDistribution.add(0d);
 			}
-			double variance = 0;
+			//double variance = 0;
+			
+			trainingDataFileName = "/home/jonas/Dokumente/Masterarbeit/AWS/testinput/tmp_30"+trainingDataFileName.substring(trainingDataFileName.lastIndexOf('/'));
+			ArrayList<SimpleMatrix> trainingData = readTrainingData(trainingDataFileName);
+			SimpleMatrix mean = mean(trainingData,0,2000);
+			mean = Preprocessor.projectData(mean);
+			SimpleMatrix var = variance(trainingData,mean,0,2000);
+			System.out.println("var: "+var);
+			System.out.println("|var|: "+Math.sqrt(var.elementSum()));
+			
+			SimpleMatrix mean_tst = mean(trainingData,2000,2200);
+			mean_tst = Preprocessor.projectData(mean_tst);
+			SimpleMatrix var_tst = variance(trainingData,mean_tst,2000,2200);
+			System.out.println("var of test set: "+var_tst);
+			System.out.println("|var_tst|: "+Math.sqrt(var_tst.elementSum()));
+
 			for (SimpleMatrix m : results) {
 				double relError = m.get(2, 0);
+				pre.set(0, 0, m.get(0, 0));
+				pre.set(1, 0, m.get(1, 0));
+				act.set(0, 0, m.get(6, 0));
+				act.set(1, 0, m.get(7, 0));
+				referencePositions.add(new SimpleMatrix(act));
+
+				pre = Preprocessor.projectData(pre);
+				act = Preprocessor.projectData(act);
 				if (m.get(5, 0) > 0.0 /* && m.get(3,0)>=0.01 */) {
 					k++;
-					pre.set(0, 0, m.get(6, 0));
-					pre.set(1, 0, m.get(7, 0));
-					act.set(0, 0, m.get(0, 0));
-					act.set(1, 0, m.get(1, 0));
-					pre = Preprocessor.projectData(pre);
-					act = Preprocessor.projectData(act);
 
+					if(Compressor.euclidianDistance(act,mean)<=1000){
+						meanRight++;
+						meanRightAll++;
+					}
+					
 					// mse = mse.plus( MatrixOps.elemPow(pre.minus(act),2) );
 					double addToMSE = Compressor.euclidianDistance(pre, act)*Compressor.euclidianDistance(pre, act);
 
@@ -172,10 +211,13 @@ public class TestOutputEvaluator {
 					predictionReliabilities.add(m.get(5, 0));
 					probBetterThan1000+=m.get(5, 0);
 					errors.add(Compressor.euclidianDistance(pre, act));
-					if (Compressor.euclidianDistance(pre, act) <= 1500) {
+					if (Compressor.euclidianDistance(pre, act) <= 1000) {
 						countSm1000++;
 						relativeErrorOfRight.add(relError);
-					}
+						rightResults.add(m);
+					}else
+						wrongResults.add(m);
+					
 					for (int j = 0; j < 10; j++) {
 
 						if (relError < ((0.01 * (double) j)+0.005) && relError >= ((0.01 * (double) j)-0.005)/* && m.get(3,0)>=0.01 */) {
@@ -202,17 +244,26 @@ public class TestOutputEvaluator {
 				System.out.println("mse1 median: " + MSEMedian[MSEMedian.length / 2]);
 			}
 			mse1 /= (double)results.size();
-			variance /= (double)results.size();
-			System.out.println("mse1: " + (mse1/variance));
+			//variance /= (double)results.size();
+			//System.out.println("mse1: " + (mse1/variance));
 			System.out.println("below X: " + countSm1000);
 			if(count1 > 0)
 				avgBetterThan1000 += ((double)countSm1000)/((double)count1)*(1/((double)fileNames.size()));
+			System.out.println(((double)countSm1000)/((double)count1));
+			System.out.println(((double)meanRight)/((double)count1));
+			if(((double)countSm1000)/((double)count1) > 2*((double)meanRight)/((double)count1))
+				System.out.println("ssssssssssssssssssssssssss");
+
 			System.out.println("---------------------------------------------------------");
 		}
 		avg02 /= fileNames.size();
 		System.out.println(avg02);
 		System.out.println("avg better than 1km: "+avgBetterThan1000);
 		System.out.println("predicted: "+(probBetterThan1000/k) + "("+k+")");
+		System.out.println("avg better using mean "+(meanRightAll/k) + "("+k+")");
+
+
+		//System.out.println("avg better using mean: "+(meanRight/k));
 		double meanError = 0;
 		double meanErrorOfRight = 0;
 		double errorOfRightCount = 0;
@@ -249,12 +300,12 @@ public class TestOutputEvaluator {
 		// error distribution
 		Double[] errorsSorted = errors.toArray(new Double[0]);
 		Arrays.sort(errorsSorted);
-		double[] errorsSortedSubSet = new double[(errorsSorted.length/10)+1];
+		double[] errorsSortedSubSet = new double[(errorsSorted.length/1)+1];
 		for(int i=0; i<errorsSorted.length; i++){
-			if(i%10 == 0)
-				errorsSortedSubSet[i/10]=errorsSorted[i]; 
+			if(i%1 == 0)
+				errorsSortedSubSet[i/1]=errorsSorted[i]; 
 		}
-		errorsToFile(errorsSortedSubSet, "errors.txt");
+		errorsToFile(errorsSortedSubSet, "errors_pred.txt");
 		
 		// prediction reliability
 		Double[] sortedPredictionReliabilities = predictionReliabilities.toArray(new Double[0]);
@@ -290,7 +341,50 @@ public class TestOutputEvaluator {
 
 		errorVariance = Math.sqrt(errorVariance);
 		System.out.println("Error variance: "+errorVariance);
+		coordinatesToFile(referencePositions,"referencePositions.txt");
+		coordinatesToFile(wrongResults,"wrongResults.txt");
+		coordinatesToFile(rightResults,"rightResults.txt");
 	}
+	
+	public static SimpleMatrix mean(List<SimpleMatrix> data, int start, int stop){
+		SimpleMatrix mean = new SimpleMatrix(2,1);
+		SimpleMatrix norm = new SimpleMatrix(2,1);
+		double count=0;
+		for (int i=start; i<stop; i++) {
+			SimpleMatrix m = data.get(i);
+			SimpleMatrix tmp = new SimpleMatrix(2,1);
+			for(int j=0; j<m.numRows()/2; j++){
+				tmp.set(0, 0, m.get(j*2, 0));
+				tmp.set(1, 0, m.get(j*2+1, 0));
+				mean = mean.plus(tmp);
+				count++;
+			}
+		}
+		norm.set(0,0,1d/count);
+		norm.set(1,0,1d/count);
+		mean = mean.elementMult(norm);
+		return mean;
+	}
+	
+	public static SimpleMatrix variance(List<SimpleMatrix> data, SimpleMatrix mean, int start, int stop){
+		SimpleMatrix var = new SimpleMatrix(2,1);
+		SimpleMatrix norm = new SimpleMatrix(2,1);
+		double count=0;
+		for (int i=start; i<stop; i++) {
+			SimpleMatrix m = data.get(i);
+			SimpleMatrix tmp = new SimpleMatrix(2,1);
+			tmp.set(0, 0, m.get(0, 0));
+			tmp.set(1, 0, m.get(1, 0));
+			tmp = Preprocessor.projectData(tmp);
+			var = var.plus(MatrixOps.elemPow(tmp.minus(mean),2));
+			count++;
+		}
+		norm.set(0,0,1d/count);
+		norm.set(1,0,1d/count);
+		var = var.elementMult(norm);
+		return var;
+	}
+	
 
 	public static ArrayList<String> listFilesForFolder(final File folder) {
 		ArrayList<String> fileNames = new ArrayList<String>();
@@ -302,7 +396,28 @@ public class TestOutputEvaluator {
 		}
 		return fileNames;
 	}
+	
+	private static String readInfoFromFile(String filename) {
+		BufferedReader br = null;
+		String info = "";
+		
+		try {
+			String sCurrentLine;
 
+			br = new BufferedReader(new FileReader(filename));
+			info = br.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (br != null)
+					br.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return info;
+	}
 	private static ArrayList<SimpleMatrix> readFromFile(String filename) {
 		BufferedReader br = null;
 		ArrayList<SimpleMatrix> dataArray = new ArrayList<SimpleMatrix>();
@@ -322,13 +437,20 @@ public class TestOutputEvaluator {
 					sCurrentLine = br.readLine();
 				if (sCurrentLine.startsWith("Time"))
 					break;
-				while (!sCurrentLine.contains("|"))
+				while (sCurrentLine != null && !sCurrentLine.contains("|"))
 					sCurrentLine = br.readLine();
+				if(sCurrentLine == null)
+					break;
 				String[] posData = sCurrentLine.split(" | ");
-				m.set(6, 0, Double.valueOf(posData[9]));
-				m.set(7, 0, Double.valueOf(posData[10]));
-				m.set(0, 0, Double.valueOf(posData[6]));
-				m.set(1, 0, Double.valueOf(posData[7]));
+				m.set(6, 0, Double.valueOf(posData[6]));
+				m.set(7, 0, Double.valueOf(posData[7]));
+				m.set(0, 0, Double.valueOf(posData[9]));
+				m.set(1, 0, Double.valueOf(posData[10]));
+				
+				/*m.set(6, 0, Double.valueOf(posData[6]));
+				m.set(7, 0, Double.valueOf(posData[7]));
+				m.set(0, 0, Double.valueOf(posData[3]));
+				m.set(1, 0, Double.valueOf(posData[4]));*/
 				br.readLine();
 				sCurrentLine = br.readLine();
 				String prediction = sCurrentLine;
@@ -362,6 +484,37 @@ public class TestOutputEvaluator {
 
 	}
 	
+	private static ArrayList<SimpleMatrix> readTrainingData(String filename) {
+		BufferedReader br = null;
+		ArrayList<SimpleMatrix> dataArray = new ArrayList<SimpleMatrix>();
+
+		try {
+			String sCurrentLine;
+
+			br = new BufferedReader(new FileReader(filename));
+			while ((sCurrentLine = br.readLine()) != null) {
+				sCurrentLine = sCurrentLine.trim();
+				String[] posData = sCurrentLine.split(" ");
+				SimpleMatrix m = new SimpleMatrix(posData.length,1);
+				for(int i=0; i<posData.length; i++)
+					m.set(i,0,Double.parseDouble(posData[i]));
+				dataArray.add(m);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (br != null)
+					br.close();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+
+		}
+		return dataArray;
+
+	}
+
 	private static String readTrainingDataFileName(String filename) {
 		String trainingDataFileName="";
 		BufferedReader br = null;
@@ -385,6 +538,8 @@ public class TestOutputEvaluator {
 		return trainingDataFileName;
 
 	}
+	
+	
 	
 	private static void errorsToFile(double[] errors, String filename) {
 		PrintWriter pw = null;
@@ -447,6 +602,25 @@ public class TestOutputEvaluator {
 			if (pw != null)
 				pw.close();
 		}
+	}
+	
+	private static void coordinatesToFile(List<SimpleMatrix> data, String file) {
+		PrintWriter pw = null;
+		try {
+			Writer fw = new FileWriter(file);
+			Writer bw = new BufferedWriter(fw);
+			pw = new PrintWriter(bw);
+			for (SimpleMatrix m : data)
+				pw.println(m.get(0, 0) + " " + m.get(1, 0));
+		}
+
+		catch (IOException e) {
+			System.err.println("Error creating file!");
+		} finally {
+			if (pw != null)
+				pw.close();
+		}
+		pw.close();
 	}
 
 	private static void measurementsToHeatMapFile(List<SimpleMatrix> data) {

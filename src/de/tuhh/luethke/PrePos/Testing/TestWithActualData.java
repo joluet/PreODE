@@ -29,7 +29,7 @@ import com.javadocmd.simplelatlng.util.LengthUnit;
 import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
 import de.tuhh.luethke.PrePos.Transformation.Postprocessor;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
-import de.tuhh.luethke.PrePos.utility.CabDataPaser;
+import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.Prediction.Predictor;
 import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
@@ -41,7 +41,7 @@ public class TestWithActualData {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		LinkedList<Measurement> testData = CabDataPaser.parse(args[0]);
+		LinkedList<Measurement> testData = CabDataParser.parse(args[0]);
 		Preprocessor.processTestData(testData);
 		//System.out.println(testData.size());
 		List<Measurement[]> testDataVectors = PositionalTSTransformer.transformTSDataMeasurements(testData, 3);
@@ -49,7 +49,7 @@ public class TestWithActualData {
 
 		testDataToFile(testData);
 
-		LinkedList<Measurement> measurements = CabDataPaser.parse(args[0]);// LatitudeHistoryParser.parse("jonas.kml");
+		LinkedList<Measurement> measurements = CabDataParser.parse(args[0]);// LatitudeHistoryParser.parse("jonas.kml");
 		//Preprocessor.processData(measurements);
 		// System.out.println(measurements.size());
 		// for (Measurement m : measurements)

@@ -11,12 +11,11 @@ import de.tuhh.luethke.oKDE.model.SampleModel;
 import de.tuhh.luethke.oKDE.utility.Optimization.Optimization;
 import de.tuhh.luethke.oKDE.utility.Optimization.SearchResult;
 
-
 /**
  * 
  * 
  * @author Jonas Lüthke
- *
+ * 
  */
 public class Predictor {
 
@@ -162,7 +161,7 @@ public class Predictor {
 	 *         the estimated probability.
 	 */
 	public Prediction predict(Measurement[] measurements, double searchRadius, double searchSegmentDistance, double accuracyRadius,
-			int predictionSegments) {
+			int predictionSegments, int UTMZoneNo, char UTMZoneLetter, boolean useAdditionalInformation) {
 		// put last measured position into vector
 		SimpleMatrix lastPositionVector = new SimpleMatrix(2, 1);
 		int steps = measurements.length;
@@ -177,13 +176,26 @@ public class Predictor {
 		long time = System.currentTimeMillis();
 
 		// put given previous measured positions into one vector
-		SimpleMatrix measuredPositions = new SimpleMatrix(2 * steps, 1);
-		for (int k = 0; k < steps; k++) {
-			measuredPositions.set(2 * k, 0, measurements[k].getLat());
-			measuredPositions.set(2 * k + 1, 0, measurements[k].getLng());
+		SimpleMatrix measuredPositions = null;
+		if (!useAdditionalInformation) {
+			measuredPositions = new SimpleMatrix(2 * steps, 1);
+			for (int k = 0; k < steps; k++) {
+				measuredPositions.set(2 * k, 0, measurements[k].getLat());
+				measuredPositions.set(2 * k + 1, 0, measurements[k].getLng());
+			}
+		} else {
+			measuredPositions = new SimpleMatrix(2 * steps + 3, 1);
+			measuredPositions.set(0, 0, measurements[0].getLat());
+			measuredPositions.set(1, 0, measurements[0].getLng());
+			measuredPositions.set(2, 0, measurements[0].getFare());
+			measuredPositions.set(3, 0, measurements[0].getSpeed());
+			measuredPositions.set(4, 0, measurements[0].getTimeOfDay());
 		}
 		// project vector using UTM
-		measuredPositions = Preprocessor.projectData(measuredPositions);
+		if(useAdditionalInformation)
+			measuredPositions = Preprocessor.projectDataFO(measuredPositions);
+		else
+			measuredPositions = Preprocessor.projectData(measuredPositions);
 
 		// obtain conditional distribution from mixture model using measured
 		// positions as condition
@@ -195,18 +207,21 @@ public class Predictor {
 		double widerProbability = 0;
 		double maxWiderProbability = 0;
 		SimpleMatrix maxPoint = null;
+		int add = 0;
+		if(useAdditionalInformation)
+			add = 3;
 		for (int i = 0; i < circlePoints.size(); i++) {
 			// for each sub circle
 			ArrayList<SimpleMatrix> subCirclePoints = circlePoints.get(i);
 			for (int j = 0; j < subCirclePoints.size(); j++) {
 				SimpleMatrix pointOnCircle = subCirclePoints.get(j);
 				// define starting point for maxima search
-				SimpleMatrix startPoint = new SimpleMatrix(2 * steps + 2, 1);
+				SimpleMatrix startPoint = new SimpleMatrix(2 * steps + 2 + add, 1);
 				for (int k = 0; k < measuredPositions.numRows(); k++) {
 					startPoint.set(k, 0, measuredPositions.get(k, 0));
 				}
-				startPoint.set(2 * steps, 0, pointOnCircle.get(0, 0));
-				startPoint.set(2 * steps + 1, 0, pointOnCircle.get(1, 0));
+				startPoint.set(2 * steps + add, 0, pointOnCircle.get(0, 0));
+				startPoint.set(2 * steps + 1 + add, 0, pointOnCircle.get(1, 0));
 				// start search for each point on sub circle
 				SearchResult result = Optimization.gradQuadrSearch(startPoint, conditionalDist.conditionalMeans, conditionalDist.conditionalCovs,
 						conditionalDist.conditionalWeights, mSampleModel);
@@ -221,7 +236,7 @@ public class Predictor {
 								conditionalDist.conditionalWeights);
 					}
 					double s = 2 * accuracyRadius * Math.sin(Math.PI / predictionSegments);
-					double baseHeight = accuracyRadius * Math.cos(Math.PI / predictionSegments);
+					double baseHeight = accuracyRadius * Math.cos(Math.PI / predictionSegments);	
 					widerProbability = volumeOfNGon(probability, h, baseHeight, s);
 					if (widerProbability > maxWiderProbability) {
 						maxWiderProbability = widerProbability;
@@ -233,14 +248,14 @@ public class Predictor {
 			}
 		}
 		// calculate marginal probability for prediction point
-		ConditionalDistribution marginalDistribution = mSampleModel.getMarginalDistribution(steps * 2);
+		ConditionalDistribution marginalDistribution = mSampleModel.getMarginalDistribution(steps * 2 + add);
 		double marginal = mSampleModel.evaluate(measuredPositions, marginalDistribution.conditionalMeans, marginalDistribution.conditionalCovs,
 				marginalDistribution.conditionalWeights);
 
 		System.out.println("Loop time: " + (System.currentTimeMillis() - time));
 		Prediction p = null;
-		if(maxPoint != null){
-			SimpleMatrix prediction = Preprocessor.projectDataBack(maxPoint);
+		if (maxPoint != null) {
+			SimpleMatrix prediction = Preprocessor.projectDataBack(maxPoint, UTMZoneNo, UTMZoneLetter);
 			p = new Prediction(prediction.get(0, 0), prediction.get(1, 0), marginal, maxProbability, maxWiderProbability, accuracyRadius);
 		}
 		return p;
