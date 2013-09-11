@@ -23,13 +23,16 @@ import de.tuhh.luethke.projection.PVector;
  */
 public class Preprocessor {
 
-	private final static int MIN_DISTANCE = 50;// 5m
+	private final static int MIN_DISTANCE = 0;// 5m
 	
-	private final static double MAX_SPEED = 40d;// 144km/h
+	private final static double MAX_SPEED = 60d;// 216km/h
 	
 	private final static double MIN_TIME_DIFF = 10d;// 10s
 	
 	private final static double TEST_TIME_STEP = 282d;// 4.7min
+	
+	private final static double MAX_ACCEL = 5.55; // in 5s from 0 to 100
+	
 
 	/**
 	 * Projects positional data from latitiude/longitude to UTM.
@@ -166,12 +169,19 @@ public class Preprocessor {
 	public static void processTestData(LinkedList<Measurement> measurements, int useOnlyCabsWithPassenger, int useParticularToD) {
 		Measurement tmp = null;
 		int count = 0;
+		int distanceCount = 0;
+		int speedCount = 0;
+		int accelCount = 0;
+		double accelleration = 0;
+		double prevSpeed = 0;
 		tmp = measurements.poll();
 		for (Iterator<Measurement> i = measurements.iterator(); i.hasNext();) {
 			Measurement m = (Measurement) i.next();
 			double distance = m.distanceInMeters(tmp);
 			double timeDiff = m.timeDiffInSeconds(tmp);
 			double speed = distance / timeDiff;
+			if(prevSpeed > 0)
+				accelleration = (speed-prevSpeed) / timeDiff;
 			m.setSpeed(speed);
 			int fare = useOnlyCabsWithPassenger;
 			if(useOnlyCabsWithPassenger != 2)
@@ -189,13 +199,23 @@ public class Preprocessor {
 					toD = 4;
 			}
 			if (distance < MIN_DISTANCE || speed > MAX_SPEED || fare != useOnlyCabsWithPassenger
-					|| toD != useParticularToD) {
+					|| toD != useParticularToD || accelleration > MAX_ACCEL) {
 				i.remove();
 				count++;
-			} else
+				if(distance < MIN_DISTANCE)
+					distanceCount++;
+				if(distance > MAX_ACCEL)
+					accelCount++;
+				if(distance <= MAX_ACCEL && speed > MAX_SPEED)
+					speedCount++;
+			} else {
 				tmp = new Measurement(m);
+				prevSpeed = speed;
+			}
 		}
-		System.out.println(count + " data points removed by preprocessor! (distance < "+MIN_DISTANCE+"m or speed > "+MAX_SPEED*3.6+"km/h)");
+		System.out.println(count + " data points removed by preprocessor! (distance < "+MIN_DISTANCE+
+				"m ("+distanceCount+"), speed > "+MAX_SPEED*3.6+"km/h ("+speedCount+")" +
+						", accelleration > "+ MAX_ACCEL+"m/s^2 ("+accelCount+"))");
 	}
 	
 
