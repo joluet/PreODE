@@ -217,6 +217,7 @@ public class PositionalTSTransformer {
 		int fare;
 		double speed;
 		int timeOfDay;
+		double direction;
 		int row = 0;
 		for (int i = 0; i < measurements.length; i++) {
 			Measurement m = measurements[i];
@@ -229,9 +230,11 @@ public class PositionalTSTransformer {
 				fare = measurements[0].getFare();
 				speed = measurements[0].getSpeed();
 				timeOfDay = measurements[0].getTimeOfDay();
-				matrix.set(row++, 0, fare);
+				direction = measurements[0].getmDirection();//calculateAngle(m,measurements[1]);
+
 				matrix.set(row++, 0, speed);
 				matrix.set(row++, 0, timeOfDay);
+				matrix.set(row++, 0, direction);
 			}
 		}
 		
@@ -256,6 +259,24 @@ public class PositionalTSTransformer {
 		}
 		matrix.set(row,Math.abs(measurements[1].getDate()-measurements[0].getDate()));
 		return matrix;
+	}
+	
+	public static double calculateAngle(Measurement m, Measurement m1) {
+		// before distance calcultion projection is necessary
+		SimpleMatrix pos = new SimpleMatrix(2, 1);
+		SimpleMatrix pos1 = new SimpleMatrix(2, 1);
+		pos.set(0, 0, m.getLat());
+		pos.set(1, 0, m.getLng());
+		pos1.set(0, 0, m1.getLat());
+		pos1.set(1, 0, m1.getLng());
+		pos = Preprocessor.projectData(pos);
+		pos1 = Preprocessor.projectData(pos1);
+		double dy = (pos1.get(0, 0) - pos.get(0, 0));
+		double dx = (pos1.get(1, 0) - pos.get(1, 0));
+		if(dx == 0)
+			dx = 1E-10;
+		double direction = Math.atan(dy / dx);
+		return direction;
 	}
 
 }

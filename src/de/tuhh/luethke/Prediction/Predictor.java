@@ -12,7 +12,7 @@ import de.tuhh.luethke.oKDE.utility.Optimization.Optimization;
 import de.tuhh.luethke.oKDE.utility.Optimization.SearchResult;
 
 /**
- * 
+ * This class calls quadratic optimization methods from the oKDE package to provide a prediction.
  * 
  * @author Jonas Lüthke
  * 
@@ -187,9 +187,9 @@ public class Predictor {
 			measuredPositions = new SimpleMatrix(2 * steps + 3, 1);
 			measuredPositions.set(0, 0, measurements[0].getLat());
 			measuredPositions.set(1, 0, measurements[0].getLng());
-			measuredPositions.set(2, 0, measurements[0].getFare());
-			measuredPositions.set(3, 0, measurements[0].getSpeed());
-			measuredPositions.set(4, 0, measurements[0].getTimeOfDay());
+			measuredPositions.set(2, 0, measurements[0].getSpeed());
+			measuredPositions.set(3, 0, measurements[0].getTimeOfDay());
+			measuredPositions.set(4, 0, measurements[0].getmDirection());
 		}
 		// project vector using UTM
 		if(useAdditionalInformation)

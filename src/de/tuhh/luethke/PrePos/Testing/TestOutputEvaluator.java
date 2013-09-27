@@ -32,10 +32,20 @@ class SimpleMatrixComp implements Comparator<SimpleMatrix> {
 	}
 }
 
+/**
+ * This class is used to evaluate the test results provided by the prediction algorithm.
+ * 
+ * @author Jonas Luethke
+ *
+ */
 public class TestOutputEvaluator {
 
 	private static final String ABS_ERROR_FOLDER = "APE/";
 	private static final String ABS_ERROR_MEAN_FOLDER = "APE_M/";
+	private static final String SPATIAL_ERROR_FOLDER = "SPATIAL_ERROR_DIST/";
+	
+	private static final String RELATIVE_ERROR_FOLDER = "RELATIVE_ERROR/";
+
 			
 	private static final int SAMPLING = 1;
 
@@ -59,7 +69,14 @@ public class TestOutputEvaluator {
 		ArrayList<String> fileNames = listFilesForFolder(folder);
 		
 		
+		List<Double> overallAbsErrors = new ArrayList<Double>();
+		List<Double> overallAbsErrorsUsingMean = new ArrayList<Double>();
 		
+		double overallNoOfPredictions = 0;
+		double overallNoOfRightPredictions = 0;
+		double overallClaimedNoOfRightPredictions = 0;
+		
+
 		
 		for (int i = 0; i < fileNames.size(); i++) {
 			String cabFileName = readInfoFromFile(folderName + fileNames.get(i));
@@ -68,34 +85,36 @@ public class TestOutputEvaluator {
 			String trainingDataFileName = fileNames.get(i);
 			String trainingDataFullPath = readTrainingDataFileName(folderName + fileNames.get(i));
 
-			ArrayList<Double> RelMESList = new ArrayList<Double>();
-
 
 			ArrayList<Double> relativeErrorDistribution =new ArrayList<Double>();
 			for (int j = 0; j < 10; j++) {
 				relativeErrorDistribution.add(0d);
 			}
-			
-			trainingDataFullPath = "/home/jonas/Dokumente/Masterarbeit/Testing/testinput/3_10"+trainingDataFullPath.substring(trainingDataFullPath.lastIndexOf('/'));
+			String trainingFileName = trainingDataFullPath.substring(trainingDataFullPath.indexOf('/'));
+			trainingDataFullPath = "/home/jonas/Dokumente/Masterarbeit/Testing/testinput"+trainingFileName;
 			ArrayList<SimpleMatrix> trainingData = readTrainingData(trainingDataFullPath);
-			SimpleMatrix mean = mean(trainingData,0,2000);
+			SimpleMatrix mean = mean(trainingData,0,3000);
 			mean = Preprocessor.projectData(mean);
-			SimpleMatrix var = variance(trainingData,mean,0,2000);
+			SimpleMatrix var = variance(trainingData,mean,0,3000);
 			System.out.println("var: "+var);
 			System.out.println("|var|: "+Math.sqrt(var.elementSum()));
 			
-			SimpleMatrix mean_tst = mean(trainingData,2000,2200);
+			SimpleMatrix mean_tst = mean(trainingData,3000,3500);
 			mean_tst = Preprocessor.projectData(mean_tst);
-			SimpleMatrix var_tst = variance(trainingData,mean_tst,2000,2200);
+			SimpleMatrix var_tst = variance(trainingData,mean_tst,3000,3500);
 			System.out.println("var of test set: "+var_tst);
 			System.out.println("|var_tst|: "+Math.sqrt(var_tst.elementSum()));
 
-			List<Double> absErrors = new ArrayList<Double>();
-			List<Double> absErrorsUsingMean = new ArrayList<Double>();
+
 
 			//metrics
 			double noOfRightPredictions = 0;
 			double noOfRightPredUsingMean = 0;
+			List<Double> absErrors = new ArrayList<Double>();
+			List<Double> absErrorsUsingMean = new ArrayList<Double>();
+			List<SimpleMatrix> spatialErrorDist = new ArrayList<SimpleMatrix>();
+
+			double avgLastDistance = 0;
 
 			
 			
@@ -103,29 +122,45 @@ public class TestOutputEvaluator {
 				double relError = result.relativeError;
 				SimpleMatrix pre = new SimpleMatrix(result.prediction);
 				SimpleMatrix ref = new SimpleMatrix(result.referencePosition);
+				SimpleMatrix refPlusError = new SimpleMatrix(3,1);
+				refPlusError.set(0,0,ref.get(0,0));
+				refPlusError.set(1,0,ref.get(1,0));
+				refPlusError.set(2,0,result.error);
+				spatialErrorDist.add(refPlusError);
 				pre = Preprocessor.projectData(pre);
 				ref = Preprocessor.projectData(ref);
+				avgLastDistance += result.lastDistance;
 				if (result.reliability > 0) {
+					if(!Double.isInfinite(relError) && relError<6)
+						relativeErrorOfRight.add(relError);
 					if (result.error <= reliabilityRadius) {
 						noOfRightPredictions++;
-						relativeErrorOfRight.add(relError);
 						rightResults.add(result.prediction);
 					}else
 						wrongResults.add(result.prediction);
-					if(Compressor.euclidianDistance(ref,mean)<=reliabilityRadius){
+					/*if(Compressor.euclidianDistance(ref,mean)<=reliabilityRadius){
 						noOfRightPredUsingMean++;
-					}
+					}*/
 					predictionReliabilities.add(result.reliability );
 					absErrors.add(result.error);
 					absErrorsUsingMean.add(Compressor.euclidianDistance(ref,mean));
 				}
 				referencePositions.add(new SimpleMatrix(ref));
+				overallNoOfPredictions++;
+				overallClaimedNoOfRightPredictions += result.reliability;
 			}
+			avgLastDistance /= ((double)results.size());
+			overallNoOfRightPredictions += noOfRightPredictions;
 			// print error distributions of each cab to seperate files:
 			cumulativeErrorDistToFile(absErrors, SAMPLING, folderName+ABS_ERROR_FOLDER+trainingDataFileName);
 			cumulativeErrorDistToFile(absErrorsUsingMean, SAMPLING, folderName+ABS_ERROR_MEAN_FOLDER+trainingDataFileName);
+			spatialerrorDistToFile(spatialErrorDist, folderName+SPATIAL_ERROR_FOLDER+trainingDataFileName, 5000);
 			coordinatesToFile(rightResults,"rightResults.txt");
 
+			overallAbsErrors.addAll(absErrors);
+			overallAbsErrorsUsingMean.addAll(absErrorsUsingMean);
+
+			
 			
 			/*System.out.println("below X: " + countSm1000);
 			if(count1 > 0)
@@ -135,16 +170,65 @@ public class TestOutputEvaluator {
 			
 			System.out.println(noOfRightPredictions+"/"+results.size());
 			System.out.println(noOfRightPredUsingMean+"/"+results.size());
+			System.out.println("avg last distance: "+avgLastDistance);
 
 			System.out.println("---------------------------------------------------------");
 		}
-		/*avg02 /= fileNames.size();
-		System.out.println(avg02);
-		System.out.println("avg better than 1km: "+avgBetterThan1000);
-		System.out.println("predicted: "+(probBetterThan1000/k) + "("+k+")");
-		System.out.println("avg better using mean "+(meanRightAll/k) + "("+k+")");*/
 
+		// print overall error distributions of all cabs to files:
+		cumulativeErrorDistToFile(overallAbsErrors, SAMPLING, folderName+ABS_ERROR_FOLDER+"overallAbsError");
+		cumulativeErrorDistToFile(overallAbsErrorsUsingMean, SAMPLING, folderName+ABS_ERROR_MEAN_FOLDER+"overallAbsErrorUsingMean");
+		
+		double avgRightPredictions = overallNoOfRightPredictions/overallNoOfPredictions; 
+		System.out.println("Average overall rigth prediction portion: "+avgRightPredictions);
+		overallClaimedNoOfRightPredictions  = overallClaimedNoOfRightPredictions/overallNoOfPredictions; 
+		System.out.println("Average overall claimed rigth prediction portion: "+overallClaimedNoOfRightPredictions);
 
+		double avgRelErrorOfRight = 0;
+		for(int i=0; i<relativeErrorOfRight.size(); i++) {
+			double relError = relativeErrorOfRight.get(i);
+			if(relError > 4){
+				relativeErrorOfRight.set(i,0d);
+				System.out.println(relError);
+			}
+			avgRelErrorOfRight += relError*relError;
+		}
+		avgRelErrorOfRight /= ((double)relativeErrorOfRight.size());
+		System.out.println("AVG Relative error of right: "+Math.sqrt(avgRelErrorOfRight));
+		Double[] sortedRelativeErrorOfRight = relativeErrorOfRight.toArray(new Double[0]);
+		Arrays.sort(sortedRelativeErrorOfRight);
+		errorsToFile(sortedRelativeErrorOfRight, folderName+RELATIVE_ERROR_FOLDER+"sortedRelativeErrorOfRight.txt");
+		System.out.println("Median Relative error of right: "+sortedRelativeErrorOfRight[sortedRelativeErrorOfRight.length/2]);
+
+		double mse = 0;
+		double mean = 0;
+		for(Double error: overallAbsErrors) {
+			mse += error*error;
+			mean += error;
+		}
+		mse /= ((double)overallAbsErrors.size());
+		mean /= ((double)overallAbsErrors.size());
+		System.out.println("RMSE: "+Math.sqrt(mse));
+		Double[] sortedAbsErrors = overallAbsErrors.toArray(new Double[0]);
+		Arrays.sort(sortedAbsErrors);
+		System.out.println("Median of absolute error: "+sortedAbsErrors[sortedAbsErrors.length/2]);
+		System.out.println("Mean of absolute error: "+mean);
+
+		double mseMean = 0;
+		double meanMean = 0;
+		for(Double error: overallAbsErrorsUsingMean) {
+			mseMean += error*error;
+			meanMean += error;
+		}
+		mseMean /= ((double)overallAbsErrorsUsingMean.size());
+		meanMean /= ((double)overallAbsErrorsUsingMean.size());
+		System.out.println("(Mean-Predictor) RMSE: "+Math.sqrt(mseMean));
+		Double[] sortedAbsErrorsUsingMean = overallAbsErrorsUsingMean.toArray(new Double[0]);
+		Arrays.sort(sortedAbsErrorsUsingMean);
+		System.out.println("(Mean-Predictor) Median of absolute error: "+sortedAbsErrorsUsingMean[sortedAbsErrorsUsingMean.length/2]);
+		System.out.println("(Mean-Predictor) Mean of absolute error: "+meanMean);
+		
+		
 		//System.out.println("avg better using mean: "+(meanRight/k));
 		double meanError = 0;
 		double meanErrorOfRight = 0;
@@ -338,7 +422,12 @@ public class TestOutputEvaluator {
 				String[] posData = sCurrentLine.split(" | ");
 				SimpleMatrix predictedPosition = new SimpleMatrix(2,1);
 				SimpleMatrix referencePosition = new SimpleMatrix(2,1);
-				if(order == 3){
+				if(order == 2){
+					referencePosition.set(0,0,Double.valueOf(posData[3]));
+					referencePosition.set(1,0,Double.valueOf(posData[4]));
+					predictedPosition.set(0,0,Double.valueOf(posData[6]));
+					predictedPosition.set(1,0,Double.valueOf(posData[7]));
+				} else if(order == 3){
 					referencePosition.set(0,0,Double.valueOf(posData[6]));
 					referencePosition.set(1,0,Double.valueOf(posData[7]));
 					predictedPosition.set(0,0,Double.valueOf(posData[9]));
@@ -463,6 +552,28 @@ public class TestOutputEvaluator {
 		errorsToFile(errorsSortedSubSet, fileName);
 	}
 	
+	private static void spatialerrorDistToFile(List<SimpleMatrix> spatialErrorList, String fileName, double threshold) {
+		PrintWriter pw = null;
+		try {
+			Writer fw = new FileWriter(fileName);
+			Writer bw = new BufferedWriter(fw);
+			pw = new PrintWriter(bw);
+			double cumulative = 0;
+			pw.println("lon lat error");
+			for (int i=0; i<spatialErrorList.size(); i++){
+				SimpleMatrix error = spatialErrorList.get(i);
+				if(error.get(2,0) <= threshold)
+					pw.println(error.get(0,0)+" "+error.get(1,0)+" "+error.get(2,0));
+			}
+		}
+
+		catch (IOException e) {
+			System.err.println("Error creating file!");
+		} finally {
+			if (pw != null)
+				pw.close();
+		}
+	}
 	
 	private static void errorsToFile(double[] errors, String filename) {
 		PrintWriter pw = null;

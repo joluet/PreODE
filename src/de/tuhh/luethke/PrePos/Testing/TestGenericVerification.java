@@ -30,7 +30,7 @@ import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
 import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
 import de.tuhh.luethke.oKDE.model.SampleModel;
 
-public class TestGeneric {
+public class TestGenericVerification {
 	
 
 	/**
@@ -279,7 +279,9 @@ public class TestGeneric {
 		System.out.println("Start prediction...");
 		ArrayList<Future<Double>> futureResults = new ArrayList<Future<Double>>();
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkerThreads);
-		for (int i = testDataVectors.size()-noOfTestingSamples; i < testDataVectors.size(); i++) {
+		//! important modification: use same data for testing as used for learning!
+		// this is used to generally verify implementation
+		for (int i = start; i < stop; i++) {
 			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter, false);
 			futureResults.add(executor.submit(worker));
 		}

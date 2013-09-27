@@ -30,38 +30,35 @@ import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
 import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
 import de.tuhh.luethke.oKDE.model.SampleModel;
 
-public class TestGeneric {
+public class TestGenericSecond {
 	
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		int argCount = 0;
-		String dataFileName = args[argCount++];
-		int noOfLearningSamples = Integer.valueOf(args[argCount++]);
-		int noOfTestingSamples = Integer.valueOf(args[argCount++]);
-		int predictionSteps = Integer.valueOf(args[argCount++]);
-		int stepSize = Integer.valueOf(args[argCount++]);
-		int tolerance = Integer.valueOf(args[argCount++]);
-		double forgettingFactor = Double.valueOf(args[argCount++]);
-		double compressionThreshold = Double.valueOf(args[argCount++]);
-		int useOnlyCabsWithPassenger = Integer.valueOf(args[argCount++]);
-		int useParticularToD = Integer.valueOf(args[argCount++]);
-
-		String kdeFileName = args[argCount++];
+		
+		String dataFileName = args[0];
+		int noOfLearningSamples = Integer.valueOf(args[1]);
+		int noOfTestingSamples = Integer.valueOf(args[2]);
+		int predictionSteps = Integer.valueOf(args[3]);
+		int stepSize = Integer.valueOf(args[4]);
+		int tolerance = Integer.valueOf(args[5]);
+		double forgettingFactor = Double.valueOf(args[6]);
+		double compressionThreshold = Double.valueOf(args[7]);
+		String kdeFileName = args[8];
 		
 		//Parameters for evaluation of KDE and optimization
-		int searchRadius = Integer.valueOf(args[argCount++]);
-		int searchSegmentDistance = Integer.valueOf(args[argCount++]);
-		int accuracyRadius = Integer.valueOf(args[argCount++]);
-		int predictionSegments = Integer.valueOf(args[argCount++]);
+		int searchRadius = Integer.valueOf(args[9]);
+		int searchSegmentDistance = Integer.valueOf(args[10]);
+		int accuracyRadius = Integer.valueOf(args[11]);
+		int predictionSegments = Integer.valueOf(args[12]);
 		
 		
 		//parameters for execution
-		int noOfWorkerThreads = Integer.valueOf(args[argCount++]);
-		long maxUpdateTime = Long.valueOf(args[argCount++])*60;
-		long maxPredictionTime = Long.valueOf(args[argCount++])*60;
+		int noOfWorkerThreads = Integer.valueOf(args[13]);
+		long maxUpdateTime = Long.valueOf(args[14])*60;
+		long maxPredictionTime = Long.valueOf(args[15])*60;
 
 
 		String paramterInfoString = "Input data file: "+dataFileName+"\n";
@@ -72,8 +69,6 @@ public class TestGeneric {
 		paramterInfoString += "Prediction step tolerance: "+tolerance+"s\n";
 		paramterInfoString += "oKDE forgetting factor: "+forgettingFactor+"\n";
 		paramterInfoString += "oKDE compression threshold: "+compressionThreshold+"\n\n";
-		paramterInfoString += "Use only cabs with passengers (1=yes, 0=no, 2=both): "+useOnlyCabsWithPassenger+"\n";
-		paramterInfoString += "Use only data from particular time of day (0=[06-12],1=[12-18],2=[18-00],3=[00-06]): "+useParticularToD+"\n\n";
 		
 		paramterInfoString += "Radius to search for maxima during prediction: "+searchRadius+"\n";
 		paramterInfoString += "Distance that defines how fine-meshed the search for maxima: "+searchSegmentDistance+"\n";
@@ -111,7 +106,8 @@ public class TestGeneric {
 			testData = PLTParser.parse(dataFileName);
 		}
 		System.out.println(testData.size()+" samples found.");
-		Preprocessor.processTestData(testData, useOnlyCabsWithPassenger, useParticularToD);
+		Preprocessor.processTestData(testData,2,-1);
+		//System.out.println(testData.size());
 		List<Measurement[]> testDataVectors = PositionalTSTransformer.transformTSDataMeasurements(testData, predictionSteps, stepSize, tolerance, overallSamples);
 
 
@@ -122,7 +118,7 @@ public class TestGeneric {
 		
 		System.out.println("$-----------------------------------------------------------------");
 
-		List<SimpleMatrix> posVectors = PositionalTSTransformer.transformTSData1(testData, predictionSteps, stepSize, tolerance, overallSamples);
+		List<SimpleMatrix> posVectors = PositionalTSTransformer.transformTSDataFirstOrder(testData, stepSize, tolerance, overallSamples);
 		System.out.println("Extracted "+testDataVectors.size()+" possible test- and learning-vectors.");
 		System.out.println("Start learning...\n");*/
 		int UTMZoneNumber = 10;
@@ -130,8 +126,6 @@ public class TestGeneric {
 		String trainingDataFileName = dataFileName;
 		ArrayList<SimpleMatrix> posVectors = readTrainingData(trainingDataFileName, predictionSteps);
 		List<Measurement[]> testDataVectors = toMeasurements(posVectors);
-		
-		dataToHeatMapFile(posVectors);
 
 		if(posVectors.size() < (noOfLearningSamples + noOfTestingSamples)){
 			System.out.println("To few data vectors could be extracted from data set!");
@@ -140,7 +134,7 @@ public class TestGeneric {
 		}
 			
 		
-		Preprocessor.projectData(posVectors);
+		Preprocessor.projectDataFirstOrder(posVectors);
 
 		SampleModel dist = new SampleModel(forgettingFactor, compressionThreshold);
 
@@ -159,6 +153,7 @@ public class TestGeneric {
 		meansA.add(posVectors.get(start));
 		meansA.add(posVectors.get(start+1));
 		meansA.add(posVectors.get(start+2));
+		meansA.add(posVectors.get(start+3));
 		long startTime = System.currentTimeMillis();
 		try {
 			dist.updateDistribution(meansA.toArray(new SimpleMatrix[3]), cov, w);
@@ -280,7 +275,7 @@ public class TestGeneric {
 		ArrayList<Future<Double>> futureResults = new ArrayList<Future<Double>>();
 		ExecutorService executor = Executors.newFixedThreadPool(noOfWorkerThreads);
 		for (int i = testDataVectors.size()-noOfTestingSamples; i < testDataVectors.size(); i++) {
-			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter, false);
+			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter, true);
 			futureResults.add(executor.submit(worker));
 		}
 		startTime = System.currentTimeMillis();
@@ -477,9 +472,9 @@ public class TestGeneric {
 			while ((sCurrentLine = br.readLine()) != null) {
 				sCurrentLine = sCurrentLine.trim();
 				String[] posData = sCurrentLine.split(" ");
-				SimpleMatrix m = new SimpleMatrix(predictionSteps*2,1);
-				int offset = posData.length - predictionSteps*2;
-				for(int i=0; i<predictionSteps*2; i++)
+				SimpleMatrix m = new SimpleMatrix(predictionSteps*2+3,1);
+				int offset = posData.length - (predictionSteps*2+3);
+				for(int i=0; i<(predictionSteps*2+3); i++)
 					m.set(i,0,Double.parseDouble(posData[i+offset]));
 				dataArray.add(m);
 			}
@@ -501,11 +496,14 @@ public class TestGeneric {
 	public static List<Measurement[]> toMeasurements(ArrayList<SimpleMatrix> vectors) {
 		List<Measurement[]> measurements = new ArrayList<Measurement[]>();
 		for(SimpleMatrix m : vectors) {
-			Measurement[] batch = new Measurement[m.numRows()/2];
-			for(int i=0; i<m.numRows()-1; i+=2){
-				Measurement meas = new Measurement(m.get(i,0), m.get(i+1,0), 0);
-				batch[i/2] = meas;
-			}
+			Measurement[] batch = new Measurement[2];
+			Measurement meas1 = new Measurement(m.get(0,0), m.get(1,0), 0);
+			meas1.setSpeed(m.get(2,0));
+			meas1.setTimeOfDay((int) m.get(3,0));
+			meas1.setmDirection(m.get(4,0));
+			Measurement meas2 = new Measurement(m.get(5,0), m.get(6,0), 0);
+			batch[0] = meas1;
+			batch[1] = meas2;
 			measurements.add(batch);
 		}
 		return measurements;

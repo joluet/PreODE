@@ -136,7 +136,7 @@ public class Preprocessor {
 		for(int i=0; i<(m.numRows()); i+=5) {
 			LatLng ll = new LatLng((float) m.get(i, 0), (float) m.get(i+1, 0));
 			double easting = ll.toUTMRef().getEasting();
-			double northing = ll.toUTMRef().getNorthing();
+			double northing = ll.toUTMRef().getNorthing() 	;
 			m.set(i, 0, easting);
 			m.set(i+1, 0, northing);
 		}
@@ -183,6 +183,7 @@ public class Preprocessor {
 			if(prevSpeed > 0)
 				accelleration = (speed-prevSpeed) / timeDiff;
 			m.setSpeed(speed);
+			m.setmDirection(PositionalTSTransformer.calculateAngle(tmp,m));
 			int fare = useOnlyCabsWithPassenger;
 			if(useOnlyCabsWithPassenger != 2)
 				fare = m.getFare();

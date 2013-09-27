@@ -15,13 +15,22 @@ public class Measurement {
 	}
 
 	private final int FACTOR_10E6 = 1000000;
-	private final double EARTH_RADIUS = 6371;
 
 	private double mLat;
 	private double mLng;
 	private int mFare;
 	private double mSpeed;
 	private int mTimeOfDay;
+	private double mDirection;
+
+
+	public double getmDirection() {
+		return mDirection;
+	}
+
+	public void setmDirection(double direction) {
+		this.mDirection = direction;
+	}
 
 	private long mDate;
 
@@ -100,7 +109,7 @@ public class Measurement {
 		}
 		return distance;
 	}
-
+	
 	public double timeDiffInSeconds(Measurement m) {
 		double diff = 0;
 		if (m != null) {
