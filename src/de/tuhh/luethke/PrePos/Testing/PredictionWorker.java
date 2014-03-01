@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2014 Jonas Luethke
+ */
+
 package de.tuhh.luethke.PrePos.Testing;
 
 import java.util.concurrent.Callable;
@@ -6,12 +10,12 @@ import com.javadocmd.simplelatlng.LatLng;
 import com.javadocmd.simplelatlng.LatLngTool;
 import com.javadocmd.simplelatlng.util.LengthUnit;
 
+import de.tuhh.luethke.PrePos.Prediction.Prediction;
+import de.tuhh.luethke.PrePos.Prediction.Predictor;
 import de.tuhh.luethke.PrePos.utility.Measurement;
-import de.tuhh.luethke.Prediction.Prediction;
-import de.tuhh.luethke.Prediction.Predictor;
 import de.tuhh.luethke.okde.model.SampleModel;
 
-public class TestWorkerXStep implements Callable<Double> {
+public class PredictionWorker implements Callable<Double> {
 
 	private Measurement[] mMeasurements;
 	SampleModel mModel;
@@ -25,7 +29,7 @@ public class TestWorkerXStep implements Callable<Double> {
 
 	
 
-	public TestWorkerXStep(Measurement[] mMeasurements, SampleModel mModel, int searchRadius, int searchSegmentDistance, int accuracyRadius,
+	public PredictionWorker(Measurement[] mMeasurements, SampleModel mModel, int searchRadius, int searchSegmentDistance, int accuracyRadius,
 			int predictionSegments, int UTMZoneNo, char UTMZoneLetter, boolean useAdditionalInfo) {
 		super();
 		this.mMeasurements = mMeasurements;

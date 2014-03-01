@@ -1,4 +1,8 @@
-package de.tuhh.luethke.Prediction;
+/*
+ * Copyright (c) 2014 Jonas Luethke
+ */
+
+package de.tuhh.luethke.PrePos.Prediction;
 
 import java.util.ArrayList;
 

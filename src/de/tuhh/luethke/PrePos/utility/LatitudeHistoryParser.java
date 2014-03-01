@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2014 Jonas Luethke
+ */
+
 package de.tuhh.luethke.PrePos.utility;
 
 import java.io.File;

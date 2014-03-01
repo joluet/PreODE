@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2014 Jonas Luethke
+ */
+
 package de.tuhh.luethke.PrePos.Testing;
 
 import java.io.BufferedReader;
@@ -282,7 +286,7 @@ public class TestGenericVerification {
 		//! important modification: use same data for testing as used for learning!
 		// this is used to generally verify implementation
 		for (int i = start; i < stop; i++) {
-			Callable<Double> worker = new TestWorkerXStep(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter, false);
+			Callable<Double> worker = new PredictionWorker(testDataVectors.get(i), dist, searchRadius, searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter, false);
 			futureResults.add(executor.submit(worker));
 		}
 		startTime = System.currentTimeMillis();
