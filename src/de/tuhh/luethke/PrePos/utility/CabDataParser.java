@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import org.ejml.simple.SimpleMatrix;
 
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
-import de.tuhh.luethke.oKDE.utility.Projection.Projector;
+import de.tuhh.luethke.okde.utility.Projection.Projector;
 
 public class CabDataParser {
 

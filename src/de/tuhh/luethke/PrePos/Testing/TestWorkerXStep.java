@@ -9,7 +9,7 @@ import com.javadocmd.simplelatlng.util.LengthUnit;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.Prediction.Prediction;
 import de.tuhh.luethke.Prediction.Predictor;
-import de.tuhh.luethke.oKDE.model.SampleModel;
+import de.tuhh.luethke.okde.model.SampleModel;
 
 public class TestWorkerXStep implements Callable<Double> {
 

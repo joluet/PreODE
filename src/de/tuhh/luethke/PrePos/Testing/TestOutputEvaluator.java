@@ -18,12 +18,12 @@ import org.ejml.data.Matrix64F;
 import org.ejml.ops.MatrixComponent;
 import org.ejml.simple.SimpleMatrix;
 
-import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
+import de.tuhh.luethke.PrePos.Transformation.DelayEmbedder;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
 import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
-import de.tuhh.luethke.oKDE.utility.Compression.Compressor;
-import de.tuhh.luethke.oKDE.utility.Matrices.MatrixOps;
+import de.tuhh.luethke.okde.utility.Compression.Compressor;
+import de.tuhh.luethke.okde.utility.Matrices.MatrixOps;
 
 class SimpleMatrixComp implements Comparator<SimpleMatrix> {
 	@Override
