@@ -19,48 +19,54 @@ import java.util.concurrent.Future;
 
 import org.ejml.simple.SimpleMatrix;
 
-import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
+import de.tuhh.luethke.PrePos.Transformation.DelayEmbedder;
 import de.tuhh.luethke.PrePos.Transformation.Postprocessor;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
 import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.LatitudeHistoryParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
 import de.tuhh.luethke.PrePos.utility.PLTParser;
-import de.tuhh.luethke.oKDE.Exceptions.EmptyDistributionException;
-import de.tuhh.luethke.oKDE.model.BaseSampleDistribution;
-import de.tuhh.luethke.oKDE.model.SampleModel;
+import de.tuhh.luethke.okde.Exceptions.EmptyDistributionException;
+import de.tuhh.luethke.okde.model.BaseSampleDistribution;
+import de.tuhh.luethke.okde.model.SampleModel;
 
 public class TestGenericSecond {
 	
 
 	/**
+	 * 
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		
+		// Parameters for the sample data
 		String dataFileName = args[0];
 		int noOfLearningSamples = Integer.valueOf(args[1]);
 		int noOfTestingSamples = Integer.valueOf(args[2]);
 		int predictionSteps = Integer.valueOf(args[3]);
 		int stepSize = Integer.valueOf(args[4]);
 		int tolerance = Integer.valueOf(args[5]);
+		
+		// Parameters for oKDE algorithm
 		double forgettingFactor = Double.valueOf(args[6]);
 		double compressionThreshold = Double.valueOf(args[7]);
 		String kdeFileName = args[8];
 		
-		//Parameters for evaluation of KDE and optimization
+		// Parameters for evaluation of KDE and mode finding
 		int searchRadius = Integer.valueOf(args[9]);
 		int searchSegmentDistance = Integer.valueOf(args[10]);
 		int accuracyRadius = Integer.valueOf(args[11]);
 		int predictionSegments = Integer.valueOf(args[12]);
 		
 		
-		//parameters for execution
+		// Parameters for execution
 		int noOfWorkerThreads = Integer.valueOf(args[13]);
 		long maxUpdateTime = Long.valueOf(args[14])*60;
 		long maxPredictionTime = Long.valueOf(args[15])*60;
 
 
+		// Print the defined parameters
 		String paramterInfoString = "Input data file: "+dataFileName+"\n";
 		paramterInfoString += "Number of samples used for learning: "+noOfLearningSamples+"\n";
 		paramterInfoString += "Number of samples used for testing: "+noOfTestingSamples+"\n";

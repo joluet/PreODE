@@ -6,10 +6,10 @@ import org.ejml.simple.SimpleMatrix;
 
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
 import de.tuhh.luethke.PrePos.utility.Measurement;
-import de.tuhh.luethke.oKDE.model.ConditionalDistribution;
-import de.tuhh.luethke.oKDE.model.SampleModel;
-import de.tuhh.luethke.oKDE.utility.Optimization.Optimization;
-import de.tuhh.luethke.oKDE.utility.Optimization.SearchResult;
+import de.tuhh.luethke.okde.model.ConditionalDistribution;
+import de.tuhh.luethke.okde.model.SampleModel;
+import de.tuhh.luethke.okde.utility.Optimization.Optimization;
+import de.tuhh.luethke.okde.utility.Optimization.SearchResult;
 
 /**
  * This class calls quadratic optimization methods from the oKDE package to provide a prediction.
@@ -22,7 +22,7 @@ public class Predictor {
 	private SampleModel mSampleModel;
 
 	/**
-	 * Creates a new prediction object.
+	 * Creates a new predictior object using a given sample model.
 	 * 
 	 * @param model
 	 *            The kde model to use for prediction.

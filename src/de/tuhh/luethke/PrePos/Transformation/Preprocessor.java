@@ -183,7 +183,7 @@ public class Preprocessor {
 			if(prevSpeed > 0)
 				accelleration = (speed-prevSpeed) / timeDiff;
 			m.setSpeed(speed);
-			m.setmDirection(PositionalTSTransformer.calculateAngle(tmp,m));
+			m.setmDirection(DelayEmbedder.calculateAngle(tmp,m));
 			int fare = useOnlyCabsWithPassenger;
 			if(useOnlyCabsWithPassenger != 2)
 				fare = m.getFare();

@@ -8,7 +8,7 @@ import org.ejml.simple.SimpleMatrix;
 
 import de.tuhh.luethke.PrePos.utility.Measurement;
 
-public class PositionalTSTransformer {
+public class DelayEmbedder {
 
 	/**
 	 * Maximum time difference between two data points: If time difference is
@@ -61,7 +61,7 @@ public class PositionalTSTransformer {
 		return transformedData;
 	}*/
 	
-	public static LinkedList<SimpleMatrix> transformTSData1(List<Measurement> data, int order, int stepSize, int tolerance, int dataPointsNeeded, double minTravelDistance) {
+	public static LinkedList<SimpleMatrix> embed(List<Measurement> data, int order, int stepSize, int tolerance, int dataPointsNeeded, double minTravelDistance) {
 		LinkedList<SimpleMatrix> transformedData = new LinkedList<SimpleMatrix>();
 		Measurement[] batch;
 		int batchIndex;

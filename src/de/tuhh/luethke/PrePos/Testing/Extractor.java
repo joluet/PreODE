@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 
 import org.ejml.simple.SimpleMatrix;
 
-import de.tuhh.luethke.PrePos.Transformation.PositionalTSTransformer;
+import de.tuhh.luethke.PrePos.Transformation.DelayEmbedder;
 import de.tuhh.luethke.PrePos.Transformation.Preprocessor;
 import de.tuhh.luethke.PrePos.utility.CabDataParser;
 import de.tuhh.luethke.PrePos.utility.Measurement;
@@ -99,9 +99,9 @@ public class Extractor implements  Callable<Boolean>{
 
 		List<SimpleMatrix> posVectors;
 		if(useOneStepExtension == 0) 
-			posVectors = PositionalTSTransformer.transformTSData1(trainingData, steps, stepsize, tolerance, numberOfSamples, minTravelDistance);
+			posVectors = DelayEmbedder.embed(trainingData, steps, stepsize, tolerance, numberOfSamples, minTravelDistance);
 		else
-			posVectors = PositionalTSTransformer.transformTSDataFirstOrder(trainingData, stepsize, tolerance, numberOfSamples, minTravelDistance);
+			posVectors = DelayEmbedder.transformTSDataFirstOrder(trainingData, stepsize, tolerance, numberOfSamples, minTravelDistance);
 
 		if(posVectors.size()>=numberOfSamples){
 			String substring = filename.substring(filename.lastIndexOf('/'));
