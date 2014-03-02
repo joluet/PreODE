@@ -24,30 +24,36 @@ public class AverageTripLengthCalc {
 		double overallAvgTripTime = 0;
 		for (String file : filesSorted) {
 			LinkedList<Measurement> trainingData = CabDataParser.parseExtended(folder + "/" + file);
-			Preprocessor.processTestData(trainingData, 2, -1);
+			Preprocessor.processTestData(trainingData);
 			Measurement tmp = trainingData.poll();
 			double sumTimeLags = 0;
 			double sumDistances = 0;
 			ArrayList<Double> times = new ArrayList<Double>();
 			double count = 0;
-			for(int i=0; i<(trainingData.size()-3); i++) {
-			//for (Iterator<Measurement> i = trainingData.iterator(); i.hasNext();) {
-				//Measurement m = (Measurement) i.next();
+			for (int i = 0; i < (trainingData.size() - 3); i++) {
+				// for (Iterator<Measurement> i = trainingData.iterator(); i.hasNext();) {
+				// Measurement m = (Measurement) i.next();
 				Measurement m = trainingData.get(i);
-				Measurement m1 = trainingData.get(i+1);
-				Measurement m2 = trainingData.get(i+2);
-				if (tmp.getFare() == 1 && tmp.getSpeed()<=2) {
-					while (i<(trainingData.size()-3) && ( m.getFare()==1 /*|| (m1.getFare() ==1&&m.timeDiffInSeconds(m2)<120)*/ || m.getSpeed()>2) ) {
-						m = (Measurement) trainingData.get(i+1);
-						m1 = trainingData.get(i+2);
-						m2 = trainingData.get(i+3);
+				Measurement m1 = trainingData.get(i + 1);
+				Measurement m2 = trainingData.get(i + 2);
+				if (tmp.getFare() == 1 && tmp.getSpeed() <= 2) {
+					while (i < (trainingData.size() - 3) && (m.getFare() == 1 /*
+																			 * || (m1.getFare()
+																			 * ==1&&
+																			 * m.timeDiffInSeconds
+																			 * (m2)<120)
+																			 */|| m.getSpeed() > 2)) {
+						m = (Measurement) trainingData.get(i + 1);
+						m1 = trainingData.get(i + 2);
+						m2 = trainingData.get(i + 3);
 						i++;
 					}
 					double timeLag = tmp.timeDiffInSeconds(m);
 					double dist = tmp.distanceInMeters(m);
 					times.add(timeLag);
-					/*if(timeLag > 2000)
-						System.out.println("mehr als 33min");*/
+					/*
+					 * if(timeLag > 2000) System.out.println("mehr als 33min");
+					 */
 					sumTimeLags += timeLag;
 					sumDistances += dist;
 					count++;
@@ -59,9 +65,9 @@ public class AverageTripLengthCalc {
 			Arrays.sort(timesSorted);
 			System.out.println(file);
 			System.out.println("Average trip time: " + (sumTimeLags / count));
-			System.out.println("Median trip time: " + timesSorted[timesSorted.length/2]);
+			System.out.println("Median trip time: " + timesSorted[timesSorted.length / 2]);
 
-			//System.out.println("Average distance: " + (sumDistances / count));
+			// System.out.println("Average distance: " + (sumDistances / count));
 
 			double mean = (sumTimeLags / count);
 			double meanDist = (sumDistances / count);
@@ -74,9 +80,9 @@ public class AverageTripLengthCalc {
 						m = (Measurement) i.next();
 					}
 					double timeLag = tmp.timeDiffInSeconds(m);
-					variance += ((timeLag-mean)*(timeLag-mean));
+					variance += ((timeLag - mean) * (timeLag - mean));
 					double dist = tmp.distanceInMeters(m);
-					varDist += ((dist-meanDist)*(dist-meanDist));
+					varDist += ((dist - meanDist) * (dist - meanDist));
 
 					count++;
 				}
@@ -85,10 +91,10 @@ public class AverageTripLengthCalc {
 			variance /= count;
 			varDist /= count;
 
-			System.out.println(Math.sqrt(variance)+"\n");
-			//System.out.println(Math.sqrt(varDist));
+			System.out.println(Math.sqrt(variance) + "\n");
+			// System.out.println(Math.sqrt(varDist));
 		}
-		System.out.println("overall avg trip time: "+overallAvgTripTime/((double) filesSorted.length));
+		System.out.println("overall avg trip time: " + overallAvgTripTime / ((double) filesSorted.length));
 	}
 
 	public static ArrayList<String> listFilesForFolder(final File folder) {

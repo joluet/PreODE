@@ -16,8 +16,7 @@ import de.tuhh.luethke.okde.utility.Optimization.Optimization;
 import de.tuhh.luethke.okde.utility.Optimization.SearchResult;
 
 /**
- * This class calls quadratic optimization methods from the oKDE package to
- * provide a prediction.
+ * This class calls quadratic optimization methods from the oKDE package to provide a prediction.
  * 
  * @author Jonas Luethke
  * 
@@ -37,16 +36,14 @@ public class Predictor {
 	}
 
 	/**
-	 * This method calculates the coordinates of a two dimensional vector. The
-	 * returned point lies on a circle around the given center with radius r at
-	 * the angle alpha = ( k * (circleSegment/r) ) k = {0,...,(2*pi*r /
-	 * circleSegment)}
+	 * This method calculates the coordinates of a two dimensional vector. The returned point lies
+	 * on a circle around the given center with radius r at the angle alpha = ( k *
+	 * (circleSegment/r) ) k = {0,...,(2*pi*r / circleSegment)}
 	 * 
 	 * @param r
 	 *            The radius of the circle.
 	 * @param circleSegment
-	 *            The length of the circle segments the circle is subdivided
-	 *            into.
+	 *            The length of the circle segments the circle is subdivided into.
 	 * @param k
 	 *            The index that determines how many circle segments to use.
 	 * @param center
@@ -68,10 +65,9 @@ public class Predictor {
 	}
 
 	/**
-	 * This method calculates the coordinates of points that are distributed a
-	 * concentric circle around the given center point. The points are equally
-	 * spaced. The number of points is defined by the parameter
-	 * noOfCircleSegments.
+	 * This method calculates the coordinates of points that are distributed a concentric circle
+	 * around the given center point. The points are equally spaced. The number of points is defined
+	 * by the parameter noOfCircleSegments.
 	 * 
 	 * @param center
 	 *            Center point of circle.
@@ -93,11 +89,10 @@ public class Predictor {
 	}
 
 	/**
-	 * This method is used to define the search area for the mode finding
-	 * algorithm. It calculates the coordinates of points that are distributed
-	 * on N concentric circles around the given center point. The distance
-	 * between each circle is defined by the given parameter. On each circle the
-	 * points are again spaced using the distance parameter.
+	 * This method is used to define the search area for the mode finding algorithm. It calculates
+	 * the coordinates of points that are distributed on N concentric circles around the given
+	 * center point. The distance between each circle is defined by the given parameter. On each
+	 * circle the points are again spaced using the distance parameter.
 	 * 
 	 * @param center
 	 *            Center point of circles.
@@ -105,8 +100,7 @@ public class Predictor {
 	 *            Radius of largest circle.
 	 * @param distance
 	 *            Distance between circles and points on circles.
-	 * @return A list with sub lists containing the points related to each
-	 *         concentric circle.
+	 * @return A list with sub lists containing the points related to each concentric circle.
 	 */
 	private ArrayList<ArrayList<SimpleMatrix>> getPointsOnConcentricCircles(SimpleMatrix center, double radius,
 			double distance) {
@@ -124,8 +118,7 @@ public class Predictor {
 	}
 
 	/**
-	 * Calculates the volume of the regular n-gon that is defined by the given
-	 * parameters.
+	 * Calculates the volume of the regular n-gon that is defined by the given parameters.
 	 * 
 	 * @param centerHeight
 	 *            The height of the center point of the n-gon.
@@ -152,9 +145,8 @@ public class Predictor {
 	}
 
 	/**
-	 * This method predicts a future location based on the model that is
-	 * associated with this Predictor object. The prediction is based on the
-	 * conditional distribution of the model.
+	 * This method predicts a future location based on the model that is associated with this
+	 * Predictor object. The prediction is based on the conditional distribution of the model.
 	 * 
 	 * @param measurements
 	 *            Latest measured positions to base the prediction on.
@@ -163,16 +155,14 @@ public class Predictor {
 	 * @param searchSegmentDistance
 	 *            Distance that defines how fine the search grid is.
 	 * @param accuracyRadius
-	 *            Radius used when estimating the cumulative probability of a
-	 *            future location.
+	 *            Radius used when estimating the cumulative probability of a future location.
 	 * @param predictionSegments
 	 *            Determines the accuracy of probability calculation.
-	 * @return A prediction object containig the predicted location as well as
-	 *         the estimated probability.
+	 * @return A prediction object containig the predicted location as well as the estimated
+	 *         probability.
 	 */
 	public Prediction predict(Measurement[] measurements, double searchRadius, double searchSegmentDistance,
-			double accuracyRadius, int predictionSegments, int UTMZoneNo, char UTMZoneLetter,
-			boolean useAdditionalInformation) {
+			double accuracyRadius, int predictionSegments, int UTMZoneNo, char UTMZoneLetter) {
 		// put last measured position into vector
 		SimpleMatrix lastPositionVector = new SimpleMatrix(2, 1);
 		int steps = measurements.length;
@@ -189,25 +179,14 @@ public class Predictor {
 
 		// put given previous measured positions into one vector
 		SimpleMatrix measuredPositions = null;
-		if (!useAdditionalInformation) {
-			measuredPositions = new SimpleMatrix(2 * steps, 1);
-			for (int k = 0; k < steps; k++) {
-				measuredPositions.set(2 * k, 0, measurements[k].getLat());
-				measuredPositions.set(2 * k + 1, 0, measurements[k].getLng());
-			}
-		} else {
-			measuredPositions = new SimpleMatrix(2 * steps + 3, 1);
-			measuredPositions.set(0, 0, measurements[0].getLat());
-			measuredPositions.set(1, 0, measurements[0].getLng());
-			measuredPositions.set(2, 0, measurements[0].getSpeed());
-			measuredPositions.set(3, 0, measurements[0].getTimeOfDay());
-			measuredPositions.set(4, 0, measurements[0].getmDirection());
+		measuredPositions = new SimpleMatrix(2 * steps, 1);
+		for (int k = 0; k < steps; k++) {
+			measuredPositions.set(2 * k, 0, measurements[k].getLat());
+			measuredPositions.set(2 * k + 1, 0, measurements[k].getLng());
 		}
+
 		// project vector using UTM
-		if (useAdditionalInformation)
-			measuredPositions = Preprocessor.projectDataFO(measuredPositions);
-		else
-			measuredPositions = Preprocessor.projectData(measuredPositions);
+		measuredPositions = Preprocessor.projectData(measuredPositions);
 
 		// obtain conditional distribution from mixture model using measured
 		// positions as condition
@@ -220,8 +199,6 @@ public class Predictor {
 		double maxWiderProbability = 0;
 		SimpleMatrix maxPoint = null;
 		int add = 0;
-		if (useAdditionalInformation)
-			add = 3;
 		for (int i = 0; i < circlePoints.size(); i++) {
 			// for each sub circle
 			ArrayList<SimpleMatrix> subCirclePoints = circlePoints.get(i);
@@ -274,5 +251,4 @@ public class Predictor {
 		}
 		return p;
 	}
-
 }

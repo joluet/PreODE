@@ -181,7 +181,7 @@ public class TestGeneric {
 		for (int i = testDataVectors.size() - noOfTestingSamples; i < testDataVectors.size(); i++) {
 			// Create worker tasks for each test data vector
 			Callable<Double> worker = new PredictionWorker(testDataVectors.get(i), dist, searchRadius,
-					searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter, false);
+					searchSegmentDistance, accuracyRadius, predictionSegments, UTMZoneNumber, UTMZoneLetter);
 			futureResults.add(executor.submit(worker));
 		}
 		startTime = System.currentTimeMillis();
