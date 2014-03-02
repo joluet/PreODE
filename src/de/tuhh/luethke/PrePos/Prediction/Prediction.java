@@ -7,7 +7,7 @@ package de.tuhh.luethke.PrePos.Prediction;
 /**
  * Container for a prediction result.
  * 
- * @author Jonas Lüthke
+ * @author Jonas Luethke
  * 
  * 
  */

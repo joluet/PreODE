@@ -16,9 +16,10 @@ import de.tuhh.luethke.okde.utility.Optimization.Optimization;
 import de.tuhh.luethke.okde.utility.Optimization.SearchResult;
 
 /**
- * This class calls quadratic optimization methods from the oKDE package to provide a prediction.
+ * This class calls quadratic optimization methods from the oKDE package to
+ * provide a prediction.
  * 
- * @author Jonas Lüthke
+ * @author Jonas Luethke
  * 
  */
 public class Predictor {
@@ -26,7 +27,7 @@ public class Predictor {
 	private SampleModel mSampleModel;
 
 	/**
-	 * Creates a new predictior object using a given sample model.
+	 * Creates a new predictor object using a given sample model.
 	 * 
 	 * @param model
 	 *            The kde model to use for prediction.
@@ -36,9 +37,10 @@ public class Predictor {
 	}
 
 	/**
-	 * Calculates the coordinates of a two dimensional vector. The returned
-	 * point lies on a circle around the given center with radius r at the angle
-	 * alpha = ( k * (circleSegment/r) ) k = {0,...,(2*pi*r / circleSegment)}
+	 * This method calculates the coordinates of a two dimensional vector. The
+	 * returned point lies on a circle around the given center with radius r at
+	 * the angle alpha = ( k * (circleSegment/r) ) k = {0,...,(2*pi*r /
+	 * circleSegment)}
 	 * 
 	 * @param r
 	 *            The radius of the circle.
@@ -66,37 +68,36 @@ public class Predictor {
 	}
 
 	/**
-	 * Calculates the volume of the regular n-gon that is defined by the given
-	 * parameters.
+	 * This method calculates the coordinates of points that are distributed a
+	 * concentric circle around the given center point. The points are equally
+	 * spaced. The number of points is defined by the parameter
+	 * noOfCircleSegments.
 	 * 
-	 * @param centerHeight
-	 *            The height of the center point of the n-gon.
-	 * @param sourroundingHeights
-	 *            The heigths of all sorrounding points of the n-gon.
-	 * @param incircleRadius
-	 *            The incircle radius of the n-gon.
-	 * @param edgeLength
-	 *            The length of an edge of the n-gon.
-	 * @return The volume of the n-gon.
+	 * @param center
+	 *            Center point of circle.
+	 * @param radius
+	 *            Radius of the circle.
+	 * @param noOfCircleSegments
+	 *            The number of segments to divide the circle into.
+	 * @return A list containing the points related to each the circle segments.
 	 */
-	private double volumeOfNGon(double centerHeight, double[] sourroundingHeights, double incircleRadius, double edgeLength) {
-		// calculate the volume of each sub prism and sum them up
-		double volume = 0;
-		for (int i = 0; i < (sourroundingHeights.length - 1); i++) {
-			double avgHeight = (centerHeight + sourroundingHeights[i] + sourroundingHeights[i + 1]) / 3;
-			double base = 0.5 * incircleRadius * edgeLength;
-			volume += (base * avgHeight);
+	private ArrayList<SimpleMatrix> getPointsOnConcentricCircle(SimpleMatrix center, double radius,
+			int noOfCircleSegments) {
+		double distance = 2 * Math.PI * radius / ((double) noOfCircleSegments);
+		ArrayList<SimpleMatrix> pointsOnSubCircle = new ArrayList<SimpleMatrix>(noOfCircleSegments);
+		for (int j = 0; j < noOfCircleSegments; j++) {
+			SimpleMatrix p = getPointOnCircle(radius, distance, j, center);
+			pointsOnSubCircle.add(p);
 		}
-		double avgHeight = (centerHeight + sourroundingHeights[0] + sourroundingHeights[sourroundingHeights.length - 1]) / 3;
-		volume += (0.5 * incircleRadius * edgeLength * avgHeight);
-		return volume;
+		return pointsOnSubCircle;
 	}
 
 	/**
-	 * This method calculates the coordinates of points that are distributed on
-	 * N concentric circles around the given center point. The distance between
-	 * each circle is defined by the given parameter. On each circle the points
-	 * are again spaced using the distance parameter.
+	 * This method is used to define the search area for the mode finding
+	 * algorithm. It calculates the coordinates of points that are distributed
+	 * on N concentric circles around the given center point. The distance
+	 * between each circle is defined by the given parameter. On each circle the
+	 * points are again spaced using the distance parameter.
 	 * 
 	 * @param center
 	 *            Center point of circles.
@@ -107,7 +108,8 @@ public class Predictor {
 	 * @return A list with sub lists containing the points related to each
 	 *         concentric circle.
 	 */
-	private ArrayList<ArrayList<SimpleMatrix>> getPointsOnConcentricCircles(SimpleMatrix center, double radius, double distance) {
+	private ArrayList<ArrayList<SimpleMatrix>> getPointsOnConcentricCircles(SimpleMatrix center, double radius,
+			double distance) {
 		// define points on concentric circles around last measured position
 		// that are used as starting points for maximum search
 		ArrayList<ArrayList<SimpleMatrix>> circlePoints = new ArrayList<ArrayList<SimpleMatrix>>();
@@ -122,33 +124,37 @@ public class Predictor {
 	}
 
 	/**
-	 * This method calculates the coordinates of points that are distributed a
-	 * concentric circle around the given center point. The points are equally
-	 * spaced. The number of points is defined by the parameter
-	 * noOfCircleSegments.
+	 * Calculates the volume of the regular n-gon that is defined by the given
+	 * parameters.
 	 * 
-	 * @param center
-	 *            Center point of circle.
-	 * @param radius
-	 *            Radius of the circle.
-	 * @param noOfCircleSegments
-	 *            The number of segments to divide the circle into.
-	 * @return A list containing the points related to each the circle segments.
+	 * @param centerHeight
+	 *            The height of the center point of the n-gon.
+	 * @param sourroundingHeights
+	 *            The heigths of all sorrounding points of the n-gon.
+	 * @param incircleRadius
+	 *            The incircle radius of the n-gon.
+	 * @param edgeLength
+	 *            The length of an edge of the n-gon.
+	 * @return The volume of the n-gon.
 	 */
-	private ArrayList<SimpleMatrix> getPointsOnConcentricCircle(SimpleMatrix center, double radius, int noOfCircleSegments) {
-		double distance = 2 * Math.PI * radius / ((double) noOfCircleSegments);
-		ArrayList<SimpleMatrix> pointsOnSubCircle = new ArrayList<SimpleMatrix>(noOfCircleSegments);
-		for (int j = 0; j < noOfCircleSegments; j++) {
-			SimpleMatrix p = getPointOnCircle(radius, distance, j, center);
-			pointsOnSubCircle.add(p);
+	private double volumeOfNGon(double centerHeight, double[] sourroundingHeights, double incircleRadius,
+			double edgeLength) {
+		// calculate the volume of each sub prism and sum them up
+		double volume = 0;
+		for (int i = 0; i < (sourroundingHeights.length - 1); i++) {
+			double avgHeight = (centerHeight + sourroundingHeights[i] + sourroundingHeights[i + 1]) / 3;
+			double base = 0.5 * incircleRadius * edgeLength;
+			volume += (base * avgHeight);
 		}
-		return pointsOnSubCircle;
+		double avgHeight = (centerHeight + sourroundingHeights[0] + sourroundingHeights[sourroundingHeights.length - 1]) / 3;
+		volume += (0.5 * incircleRadius * edgeLength * avgHeight);
+		return volume;
 	}
 
 	/**
 	 * This method predicts a future location based on the model that is
 	 * associated with this Predictor object. The prediction is based on the
-	 * conditional distribution of the model. For detailed information see.
+	 * conditional distribution of the model.
 	 * 
 	 * @param measurements
 	 *            Latest measured positions to base the prediction on.
@@ -164,8 +170,9 @@ public class Predictor {
 	 * @return A prediction object containig the predicted location as well as
 	 *         the estimated probability.
 	 */
-	public Prediction predict(Measurement[] measurements, double searchRadius, double searchSegmentDistance, double accuracyRadius,
-			int predictionSegments, int UTMZoneNo, char UTMZoneLetter, boolean useAdditionalInformation) {
+	public Prediction predict(Measurement[] measurements, double searchRadius, double searchSegmentDistance,
+			double accuracyRadius, int predictionSegments, int UTMZoneNo, char UTMZoneLetter,
+			boolean useAdditionalInformation) {
 		// put last measured position into vector
 		SimpleMatrix lastPositionVector = new SimpleMatrix(2, 1);
 		int steps = measurements.length;
@@ -175,7 +182,8 @@ public class Predictor {
 
 		// define points on concentric circles around last measured position
 		// that are used as starting points for maximum search
-		ArrayList<ArrayList<SimpleMatrix>> circlePoints = getPointsOnConcentricCircles(lastPositionVector, searchRadius, searchSegmentDistance);
+		ArrayList<ArrayList<SimpleMatrix>> circlePoints = getPointsOnConcentricCircles(lastPositionVector,
+				searchRadius, searchSegmentDistance);
 
 		long time = System.currentTimeMillis();
 
@@ -196,7 +204,7 @@ public class Predictor {
 			measuredPositions.set(4, 0, measurements[0].getmDirection());
 		}
 		// project vector using UTM
-		if(useAdditionalInformation)
+		if (useAdditionalInformation)
 			measuredPositions = Preprocessor.projectDataFO(measuredPositions);
 		else
 			measuredPositions = Preprocessor.projectData(measuredPositions);
@@ -212,7 +220,7 @@ public class Predictor {
 		double maxWiderProbability = 0;
 		SimpleMatrix maxPoint = null;
 		int add = 0;
-		if(useAdditionalInformation)
+		if (useAdditionalInformation)
 			add = 3;
 		for (int i = 0; i < circlePoints.size(); i++) {
 			// for each sub circle
@@ -227,20 +235,21 @@ public class Predictor {
 				startPoint.set(2 * steps + add, 0, pointOnCircle.get(0, 0));
 				startPoint.set(2 * steps + 1 + add, 0, pointOnCircle.get(1, 0));
 				// start search for each point on sub circle
-				SearchResult result = Optimization.gradQuadrSearch(startPoint, conditionalDist.conditionalMeans, conditionalDist.conditionalCovs,
-						conditionalDist.conditionalWeights, mSampleModel);
+				SearchResult result = Optimization.gradQuadrSearch(startPoint, conditionalDist.conditionalMeans,
+						conditionalDist.conditionalCovs, conditionalDist.conditionalWeights, mSampleModel);
 				double probability = result.probability;
 				if (probability > maxProbability) {
 					// calculate cumulative probability in regular n-gon around
 					// maximum
-					ArrayList<SimpleMatrix> fineCirclePoints = getPointsOnConcentricCircle(result.point, accuracyRadius, predictionSegments);
+					ArrayList<SimpleMatrix> fineCirclePoints = getPointsOnConcentricCircle(result.point,
+							accuracyRadius, predictionSegments);
 					double h[] = new double[fineCirclePoints.size()];
 					for (int l = 0; l < fineCirclePoints.size(); l++) {
-						h[l] = mSampleModel.evaluate(fineCirclePoints.get(l), conditionalDist.conditionalMeans, conditionalDist.conditionalCovs,
-								conditionalDist.conditionalWeights);
+						h[l] = mSampleModel.evaluate(fineCirclePoints.get(l), conditionalDist.conditionalMeans,
+								conditionalDist.conditionalCovs, conditionalDist.conditionalWeights);
 					}
 					double s = 2 * accuracyRadius * Math.sin(Math.PI / predictionSegments);
-					double baseHeight = accuracyRadius * Math.cos(Math.PI / predictionSegments);	
+					double baseHeight = accuracyRadius * Math.cos(Math.PI / predictionSegments);
 					widerProbability = volumeOfNGon(probability, h, baseHeight, s);
 					if (widerProbability > maxWiderProbability) {
 						maxWiderProbability = widerProbability;
@@ -253,14 +262,15 @@ public class Predictor {
 		}
 		// calculate marginal probability for prediction point
 		ConditionalDistribution marginalDistribution = mSampleModel.getMarginalDistribution(steps * 2 + add);
-		double marginal = mSampleModel.evaluate(measuredPositions, marginalDistribution.conditionalMeans, marginalDistribution.conditionalCovs,
-				marginalDistribution.conditionalWeights);
+		double marginal = mSampleModel.evaluate(measuredPositions, marginalDistribution.conditionalMeans,
+				marginalDistribution.conditionalCovs, marginalDistribution.conditionalWeights);
 
 		System.out.println("Loop time: " + (System.currentTimeMillis() - time));
 		Prediction p = null;
 		if (maxPoint != null) {
 			SimpleMatrix prediction = Preprocessor.projectDataBack(maxPoint, UTMZoneNo, UTMZoneLetter);
-			p = new Prediction(prediction.get(0, 0), prediction.get(1, 0), marginal, maxProbability, maxWiderProbability, accuracyRadius);
+			p = new Prediction(prediction.get(0, 0), prediction.get(1, 0), marginal, maxProbability,
+					maxWiderProbability, accuracyRadius);
 		}
 		return p;
 	}
