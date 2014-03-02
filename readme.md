@@ -1,0 +1,86 @@
+PrePos
+=========
+
+This is the java implementation of an algorithm that estimates
+a model of human mobility and exploits the estimated model to predict future locations
+of human individuals. The algorithm was developed as part of a master's thesis with the topic
+*Location Prediction Based on Mobility Patterns in Location Histories*.
+
+
+*******************************
+
+1. [Location Prediction Based on Mobility Patterns in Location Histories](#thesis)
+2. [Build Instructions](#build)
+3. [Quickstart](#start)
+4. [External Libraries Used](#ext_libs)
+5. [License](#license)
+
+*******************************
+
+
+
+
+<a name="thesis">
+##Master's thesis: Location Prediction Based on Mobility Patterns in Location Histories
+
+The prediction algorithm that is implemented in this project is described in detail in my master's thesis.
+Furthermore, the proposed algorithm was tested using mobility traces of taxis. The test results are listed and analyzed in my thesis as well.  
+
+Download the complete thesis as pdf [here](thesis_luethke.pdf).
+
+**Abstract**  
+Human individuals generally tend to follow several habits during the course of the day. 
+This fact intuitively allows predicting human behavior to a certain degree based on previous observations.
+This thesis focuses on the mobility of human individuals. To be specific, a generic algorithm that uses 
+*kernel density estimation* and *quadratic optimization* to provide location predictions is proposed. 
+There are several imaginable fields of application for such an algorithm, like for example location based services or commercials.
+The proposed algorithm was implemented and tested using mobility traces of taxis. 
+The test results clearly indicate that the algorithm can extract and exploit patterns in the data to predict future locations. 
+For instance, the algorithm achieves an accuracy better than 1000m in approximately 32% of the executed tests using a prediction interval of six minutes.
+Moreover, in 13% of these tests the prediction error is smaller than 500m. In addition,
+the test results show that the algorithm is able to estimate the reliability of its predictions with an accuracy of up to 98.75%.
+As expected, the test results also clearly demonstrate that the prediction capability of the algorithm strongly depends on the properties
+of the given location data and the underlying stochastic process.
+
+
+
+<a name="build">
+## Build Instructions
+
+Just execute ant in project root to compile the project:
+
+**$ ant**
+
+Afterwards, the packed jar file can be found in the *dist*-folder.
+
+
+
+<a name="start">
+## Quickstart
+
+[Here](https://github.com/joluet/okde-java-example) you can find a simple example that uses oKDE-Java
+to estimate a distribution of randomly generated samples. This example illustrates the basic usage
+of oKDE-java.
+
+To use oKDE-Java in another project just include the jar file (see above [how to build](#build)).
+
+
+
+<a name="ext_libs">
+## External Libraries Used
+
+The following libraries are used in this project:
+ *	[okde-java](https://github.com/joluet/okde-java),  
+ 	A Java implementation of the oKDE algorithm proposed by Matej Kristan  
+ 	License: MIT License (MIT)
+	([oKDE](http://www.vicos.si/Research/Multivariate_Online_Kernel_Density_Estimation)).
+ *  [EJML v0.24](https://code.google.com/p/efficient-java-matrix-library/),  
+ 	a linear algebra library for manipulating dense matrices  
+ 	License: [Apache v2.0](http://www.apache.org/licenses/LICENSE-2.0)
+ 
+
+
+<a name="license">
+## License
+
+This project is under the [MIT License (MIT)](license.md).
