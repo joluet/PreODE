@@ -70,13 +70,23 @@ To use oKDE-Java in another project just include the jar file (see above [how to
 ## External Libraries Used
 
 The following libraries are used in this project:
+ *  [EJML v0.24](https://code.google.com/p/efficient-java-matrix-library/),  
+ 	a linear algebra library for manipulating dense matrices  
+ 	License: [Apache v2.0](http://www.apache.org/licenses/LICENSE-2.0)
+ *	[SimpleLatLng](https://code.google.com/p/simplelatlng/),
+ 	Provides a simple, lightweight library for common latitude and longitude calculation needs in Java.
+ 	License: [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+ *	[Jcoord](http://www.jstott.me.uk/jcoord/)
+ 	A library that helps to easily convert between latitude/longitude,
+ 	Universal Transverse Mercator (UTM) and Ordnance Survey (OSGB) references  
+ 	License: [GNU General Public License (GPL)](http://www.jstott.me.uk/gpl/)
+ *	[Java API for KML](https://code.google.com/p/javaapiforkml/),
+ 	Provides Java interfaces for easy access to KML (Keyhole Markup Language) data.  
+ 	License: [New BSD License](http://opensource.org/licenses/BSD-3-Clause)
  *	[okde-java](https://github.com/joluet/okde-java),  
  	A Java implementation of the oKDE algorithm proposed by Matej Kristan  
  	License: MIT License (MIT)
 	([oKDE](http://www.vicos.si/Research/Multivariate_Online_Kernel_Density_Estimation)).
- *  [EJML v0.24](https://code.google.com/p/efficient-java-matrix-library/),  
- 	a linear algebra library for manipulating dense matrices  
- 	License: [Apache v2.0](http://www.apache.org/licenses/LICENSE-2.0)
  
 
 
