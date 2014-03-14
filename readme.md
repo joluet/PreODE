@@ -81,6 +81,3 @@ The following libraries are used in this project:
  	License: [New BSD License](http://opensource.org/licenses/BSD-3-Clause)  
  *	[okde-java](https://github.com/joluet/okde-java),  
  	A Java implementation of the oKDE algorithm proposed by Matej Kristan  
- 	License: MIT License (MIT)
-	([oKDE](http://www.vicos.si/Research/Multivariate_Online_Kernel_Density_Estimation)).
- 
