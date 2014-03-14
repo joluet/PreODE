@@ -26,7 +26,7 @@ of human individuals. The algorithm was developed as part of a master's thesis w
 The prediction algorithm that is implemented in this project is described in detail in my master's thesis.
 Furthermore, the proposed algorithm was tested using mobility traces of taxis. The test results are listed and analyzed in my thesis as well.  
 
-Download the complete thesis as pdf [here](http://www.sts.tu-harburg.de/pw-and-m-theses/2013/luethke13.pdf)([BibTeX](http://www.sts.tu-harburg.de/pw-and-m-theses/2013/luethke13.bib)).
+Download the complete thesis as pdf [here](http://www.sts.tu-harburg.de/pw-and-m-theses/2013/luethke13.pdf) ([BibTeX](http://www.sts.tu-harburg.de/pw-and-m-theses/2013/luethke13.bib)).
 
 **Abstract**  
 Human individuals generally tend to follow several habits during the course of the day. 
