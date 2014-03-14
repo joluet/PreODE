@@ -84,9 +84,3 @@ The following libraries are used in this project:
  	License: MIT License (MIT)
 	([oKDE](http://www.vicos.si/Research/Multivariate_Online_Kernel_Density_Estimation)).
  
-
-
-<a name="license">
-## License
-
-This project is under the [MIT License (MIT)](license.md).
