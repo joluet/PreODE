@@ -26,7 +26,7 @@ of human individuals. The algorithm was developed as part of a master's thesis w
 The prediction algorithm that is implemented in this project is described in detail in my master's thesis.
 Furthermore, the proposed algorithm was tested using mobility traces of taxis. The test results are listed and analyzed in my thesis as well.  
 
-Download the complete thesis as pdf [here](thesis_luethke.pdf).
+Download the complete thesis as pdf [here](http://www.sts.tu-harburg.de/pw-and-m-theses/2013/luethke13.pdf).
 
 **Abstract**  
 Human individuals generally tend to follow several habits during the course of the day. 
@@ -85,3 +85,10 @@ The following libraries are used in this project:
 	([oKDE](http://www.vicos.si/Research/Multivariate_Online_Kernel_Density_Estimation)).
  
 
+
+<a name="license">
+## License
+
+This project is free software: you can redistribute it and/or modify
+it under the terms of the [GNU General Public License](license.txt) as published by
+the Free Software Foundation, either version 3 of the License, or any later version.
