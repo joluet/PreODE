@@ -1,6 +1,6 @@
 PreODE
 =========
-**Pred**iction based on **O**nline **D**ensity **E**stimation in the **D**elay **E**mbedding Space
+**Pred** iction based on **O** nline **D** ensity **E** stimation in the **D** elay **E** mbedding Space
 
 This is the java implementation of an algorithm that estimates
 a model of human mobility and exploits the estimated model to predict future locations
