@@ -27,16 +27,16 @@ of human individuals. The algorithm was developed as part of a master's thesis w
 The prediction algorithm that is implemented in this project is described in detail in my master's thesis.
 Furthermore, the proposed algorithm was tested using mobility traces of taxis. The test results are listed and analyzed in my thesis as well.  
 
-Download the complete thesis as pdf [here](http://www.sts.tu-harburg.de/pw-and-m-theses/2013/luethke13.pdf) ([BibTeX](http://www.sts.tu-harburg.de/pw-and-m-theses/2013/luethke13.bib)).
+Download the complete thesis as pdf [here](https://www.dropbox.com/s/xqoo2pugqzeyd2o/mastersthesis_luthke.pdf?dl=1).
 
 **Abstract**  
-Human individuals generally tend to follow several habits during the course of the day. 
+Human individuals generally tend to follow several habits during the course of the day.
 This fact intuitively allows predicting human behavior to a certain degree based on previous observations.
-This thesis focuses on the mobility of human individuals. To be specific, a generic algorithm that uses 
-*kernel density estimation* and *quadratic optimization* to provide location predictions is proposed. 
+This thesis focuses on the mobility of human individuals. To be specific, a generic algorithm that uses
+*kernel density estimation* and *quadratic optimization* to provide location predictions is proposed.
 There are several imaginable fields of application for such an algorithm, like for example location based services or commercials.
-The proposed algorithm was implemented and tested using mobility traces of taxis. 
-The test results clearly indicate that the algorithm can extract and exploit patterns in the data to predict future locations. 
+The proposed algorithm was implemented and tested using mobility traces of taxis.
+The test results clearly indicate that the algorithm can extract and exploit patterns in the data to predict future locations.
 For instance, the algorithm achieves an accuracy better than 1000m in approximately 32% of the executed tests using a prediction interval of six minutes.
 Moreover, in 13% of these tests the prediction error is smaller than 500m. In addition,
 the test results show that the algorithm is able to estimate the reliability of its predictions with an accuracy of up to 98.75%.
@@ -83,5 +83,3 @@ The following libraries are used in this project:
  *	[okde-java](https://github.com/joluet/okde-java),  
  	A Java implementation of the oKDE algorithm proposed by Matej Kristan  
 	([oKDE](http://www.vicos.si/Research/Multivariate_Online_Kernel_Density_Estimation)).
- 
-
